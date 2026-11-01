@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StadiumSafe AI — Smart Stadium Navigation & Safety</title>
-  <link rel="stylesheet" href="css/style.css?v=3.0">
+  <link rel="stylesheet" href="css/style.css?v=3.5">
   <style>
     /* CRITICAL INLINE MAP & WAYFINDING STYLES (IMMUNE TO CACHE ISSUES) */
     .stadium-map-card {
@@ -968,14 +968,21 @@
                 <option value="GATE_1" selected>Gate 1 (Entry Gate A - Main Entrance)</option>
                 <option value="GATE_2">Gate 2 (North-East Gate)</option>
                 <option value="GATE_3">Gate 3 (South Concourse Gate)</option>
-                <option value="PARKING_A">Parking Zone A</option>
-                <option value="PARKING_B">Parking Zone B</option>
-                <option value="PARKING_C">Parking Zone C</option>
                 <option value="WEST_STAND">West Stand (Sec 101-115)</option>
                 <option value="EAST_STAND">East Stand (Sec 201-215)</option>
                 <option value="NORTH_STAND">North Stand (Club House)</option>
                 <option value="SOUTH_STAND">South Stand (Pavilion)</option>
                 <option value="FOOD_COURT">Food & Beverage Court</option>
+                <option value="RESTROOM_A">Restroom A (West Concourse)</option>
+                <option value="RESTROOM_B">Restroom B (East Concourse)</option>
+                <option value="PARKING_A">Parking Zone A (West)</option>
+                <option value="PARKING_B">Parking Zone B (East)</option>
+                <option value="PARKING_C">Parking Zone C (South-East)</option>
+                <option value="CONCOURSE_A">Concourse A (West Walkway)</option>
+                <option value="CENTER_CROSS">Concourse C (Center Crossroads)</option>
+                <option value="EMERGENCY_EXIT_1">Emergency Exit 1 (North-West)</option>
+                <option value="EMERGENCY_EXIT_2">Emergency Exit 2 (North-East)</option>
+                <option value="EMERGENCY_EXIT_3">Emergency Exit 3 (South-East)</option>
               </select>
             </div>
 
@@ -990,11 +997,17 @@
                 <option value="FOOD_COURT">Food & Beverage Court</option>
                 <option value="RESTROOM_A">Restroom A (West Concourse)</option>
                 <option value="RESTROOM_B">Restroom B (East Concourse)</option>
+                <option value="GATE_1">Gate 1 (Entry Gate A)</option>
+                <option value="GATE_2">Gate 2 (North-East Gate)</option>
+                <option value="GATE_3">Gate 3 (South Concourse Gate)</option>
+                <option value="PARKING_A">Parking Zone A (West)</option>
+                <option value="PARKING_B">Parking Zone B (East)</option>
+                <option value="PARKING_C">Parking Zone C (South-East)</option>
+                <option value="CONCOURSE_A">Concourse A (West Walkway)</option>
+                <option value="CENTER_CROSS">Concourse C (Center Crossroads)</option>
                 <option value="EMERGENCY_EXIT_1">Emergency Exit 1 (North-West)</option>
                 <option value="EMERGENCY_EXIT_2">Emergency Exit 2 (North-East)</option>
                 <option value="EMERGENCY_EXIT_3">Emergency Exit 3 (South-East)</option>
-                <option value="GATE_2">Gate 2</option>
-                <option value="GATE_3">Gate 3</option>
               </select>
             </div>
           </div>
@@ -1017,9 +1030,14 @@
             </div>
           </div>
 
-          <button class="btn-primary-blue" onclick="runLiveNavigation()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1rem; padding: 0.9rem;">
-            🧭 Start Navigation / Recalculate Route
-          </button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <button type="button" class="btn-primary-blue" onclick="runLiveNavigation()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; padding: 0.85rem;">
+              🧭 Recalculate Route
+            </button>
+            <button type="button" class="btn-primary-blue" onclick="triggerEvacuationToNearestExit()" style="background: #dc2626; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; padding: 0.85rem;">
+              🚨 Route to Nearest Exit
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1102,10 +1120,10 @@
   </nav>
 
   <!-- SCRIPTS (WITH CACHE BUSTERS TO PREVENT STALE GITHUB CDN SERVING) -->
-  <script src="js/app.js?v=3.0"></script>
-  <script src="js/sensorService.js?v=3.0"></script>
-  <script src="js/esp32Serial.js?v=3.0"></script>
-  <script src="js/navigationService.js?v=3.0"></script>
+  <script src="js/app.js?v=3.5"></script>
+  <script src="js/sensorService.js?v=3.5"></script>
+  <script src="js/esp32Serial.js?v=3.5"></script>
+  <script src="js/navigationService.js?v=3.5"></script>
   <script>
     // -------------------------------------------------------------
     // SCREEN NAVIGATION (UNIFIED FOR MOBILE & DESKTOP)
@@ -1129,7 +1147,11 @@
       if (screenId === 'view-home') document.getElementById('d-nav-home')?.classList.add('active');
       if (screenId === 'view-crowd') document.getElementById('d-nav-crowd')?.classList.add('active');
       if (screenId === 'view-parking') document.getElementById('d-nav-parking')?.classList.add('active');
-      if (screenId === 'view-navigation') document.getElementById('d-nav-navigation')?.classList.add('active');
+      if (screenId === 'view-navigation') {
+        document.getElementById('d-nav-navigation')?.classList.add('active');
+        // Redraw route whenever user switches into navigation tab
+        setTimeout(() => { if (typeof runLiveNavigation === 'function') runLiveNavigation(); }, 60);
+      }
       if (screenId === 'view-emergency') document.getElementById('d-nav-emergency')?.classList.add('active');
 
       // Hide mobile bottom nav on splash & select screens
@@ -1152,11 +1174,6 @@
 
     function openFindSeatModal() {
       alert("🎟️ Digital Seat Locator: Section 102 • Row 12 • Seat 08 (West Stand Lower). Follow walkway to Gate A.");
-    }
-
-    function navigateToZone(zoneName) {
-      alert(`🧭 Navigation path set to: ${zoneName}. Follow directional markers from Concourse.`);
-      goToScreen('view-navigation');
     }
 
     // -------------------------------------------------------------
@@ -1522,7 +1539,7 @@
       // 6. NAVIGATION DIJKSTRA DYNAMIC HAZARD DETOUR
       const detourNotice = document.getElementById('nav-detour-notice');
       const gate1Circle = document.getElementById('circle-node-gate1');
-      const isGateBlocked = flame || isGasEmergency || (distance_cm && distance_cm > 0 && distance_cm < 25);
+      const isGateBlocked = Boolean(flame) || Boolean(isGasEmergency) || (typeof distance_cm === 'number' && distance_cm > 0 && distance_cm < 25);
       
       if (gate1Circle) {
         if (isGateBlocked) {
@@ -1534,20 +1551,28 @@
         }
       }
 
-      // 6. NAVIGATION DIJKSTRA DYNAMIC HAZARD DETOUR & AUTO-EVACUATION
-      if (isGateBlocked) {
-        // Automatically route to the NEAREST SAFE EMERGENCY EXIT from person's location!
-        handleHardwareDisasterEvacuation();
-      } else {
-        if (detourNotice) detourNotice.style.display = 'none';
-        if (document.getElementById('view-navigation')?.classList.contains('active')) {
+      // Update map notice without hijacking the screen
+      if (detourNotice) {
+        if (isGateBlocked) {
+          detourNotice.style.display = 'block';
+          detourNotice.innerHTML = `🚨 <strong>Dynamic Hazard Detour Active:</strong> Gate 1 is blocked by real sensor hazard! Safe bypass route avoids Gate 1.`;
+        } else {
+          detourNotice.style.display = 'none';
+        }
+      }
+
+      // ONLY re-route if the user is ALREADY currently on the navigation screen AND the hazard state actually changed
+      const navView = document.getElementById('view-navigation');
+      if (navView && navView.classList.contains('active')) {
+        if (window._prevGateBlockedState !== isGateBlocked) {
+          window._prevGateBlockedState = isGateBlocked;
           runLiveNavigation();
         }
       }
     });
 
-    // Automatic disaster evacuation router: Directly shows route to nearest safe emergency exit from person's location
-    function handleHardwareDisasterEvacuation() {
+    // Dedicated Evacuate Function: triggered when user clicks "Route to Nearest Exit"
+    function triggerEvacuationToNearestExit() {
       const startSelect = document.getElementById('nav-start-select');
       const destSelect = document.getElementById('nav-dest-select');
       const currentStart = startSelect ? startSelect.value : 'WEST_STAND';
@@ -1559,7 +1584,6 @@
           destSelect.value = nearest.exitId;
         }
 
-        // Switch automatically to navigation view if not already there
         goToScreen('view-navigation');
         runLiveNavigation();
 
@@ -1569,10 +1593,14 @@
           const exitName = nearest.exitId === 'EMERGENCY_EXIT_1' ? 'Emergency Exit 1 (North-West)' 
                         : nearest.exitId === 'EMERGENCY_EXIT_2' ? 'Emergency Exit 2 (North-East)' 
                         : 'Emergency Exit 3 (South-East)';
-          detourNotice.innerHTML = `🚨 <strong>AUTOMATIC EVACUATION ACTIVE:</strong> Physical hazard detected at Gate 1! Nearest safe exit from your location is <strong>${exitName}</strong> (${nearest.result.distance}m away). Follow illuminated floor markers now!`;
+          detourNotice.innerHTML = `🚨 <strong>EMERGENCY EVACUATION ACTIVE:</strong> Nearest safe exit from your location is <strong>${exitName}</strong> (${nearest.result.distance}m away). Follow illuminated floor markers now!`;
+        }
+        if (window.StadiumApp && window.StadiumApp.showToast) {
+          window.StadiumApp.showToast(`🚨 Routing to nearest safe exit (${nearest.result.distance}m)`, 'danger', 3000);
         }
       }
     }
+    window.triggerEvacuationToNearestExit = triggerEvacuationToNearestExit;
 
     // -------------------------------------------------------------
     // REALISTIC INTERACTIVE STADIUM MAP ENGINE (IMAGE 2)
