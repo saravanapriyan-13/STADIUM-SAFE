@@ -61,7 +61,7 @@
 // Set to 'true' if you want the ESP32 to also connect to Wi-Fi and host HTTP endpoints
 #define ENABLE_WIFI   false
 
-const char* WIFI_SSID     = "Your_WiFi_Name";
+const char* WIFI_SSID     = "Your_WiFI";
 const char* WIFI_PASSWORD = "Your_WiFi_Password";
 
 #if ENABLE_WIFI
