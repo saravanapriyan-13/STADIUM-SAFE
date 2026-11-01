@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Command Center — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .escalation-step {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      background: rgba(7, 11, 20, 0.6);
+      border: 1px solid var(--border-card);
+      margin-bottom: 0.5rem;
+    }
+    .escalation-step.active-step {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+    }
+    .level-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+    .active-step .level-badge {
+      background: #ef4444;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">Emergency Response Command</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-esp-mode" class="badge badge-muted">STANDBY</span>
+        <span id="global-data-badge" class="badge badge-muted">OFFLINE</span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="sensors.html" class="nav-link">⚡ Live ESP32</a>
+        <a href="crowd.html" class="nav-link">Crowd</a>
+        <a href="parking.html" class="nav-link">Parking</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="emergency.html" class="nav-link active">Emergency</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="global-emergency-banner" class="emergency-banner hidden"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">EMERGENCY RESPONSE & EVACUATION PROTOCOL</h1>
+        <p class="page-subtitle">Multi-tier escalation triggered by real hardware flame and environmental anomalies.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-danger" onclick="window.SimulationService.simulateFire()">🔥 Trigger Simulated Fire</button>
+        <button class="btn btn-secondary" onclick="window.SimulationService.resetSimulation()">🟢 Clear Hazards</button>
+      </div>
+    </div>
+
+    <!-- Active Threat Hero -->
+    <div id="emergency-status-box" class="glass-panel" style="margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span id="em-level-badge" class="badge badge-success">ALL SYSTEMS SECURE</span>
+          <h2 id="em-title" style="font-size: 1.6rem; font-weight: 800; margin-top: 0.25rem;">No Active Threats Detected</h2>
+          <p id="em-desc" style="font-size: 0.9rem; color: var(--text-secondary);">
+            ESP32 flame sensor and environmental monitors reporting normal parameters across all zones.
+          </p>
+        </div>
+        <div style="text-align: right;">
+          <div id="em-source-label" style="font-size: 0.8rem; color: var(--text-muted);">MONITOR SOURCE</div>
+          <div id="em-source-val" style="font-size: 1.1rem; font-weight: 800; color: var(--accent-cyan);">STADIUMSAFE-ESP32-01</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom: 2rem;">
+      <!-- 5-Tier Emergency Escalation Chain -->
+      <div class="glass-panel">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Automated Escalation Pipeline</h3>
+        
+        <div id="step-1" class="escalation-step">
+          <div class="level-badge">L1</div>
+          <div>
+            <strong>Level 1 — Sensor Telemetry Trigger</strong>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">Infrared flame sensor pulls GPIO 19 LOW on flame detection.</p>
+          </div>
+        </div>
+
+        <div id="step-2" class="escalation-step">
+          <div class="level-badge">L2</div>
+          <div>
+            <strong>Level 2 — Global Application State Update</strong>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">BroadcastChannel syncs alert state across all browser windows & server.</p>
+          </div>
+        </div>
+
+        <div id="step-3" class="escalation-step">
+          <div class="level-badge">L3</div>
+          <div>
+            <strong>Level 3 — Control Room Incident Dispatch</strong>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">Audible synthesizer siren sounds; incident assigned to security staff.</p>
+          </div>
+        </div>
+
+        <div id="step-4" class="escalation-step">
+          <div class="level-badge">L4</div>
+          <div>
+            <strong>Level 4 — Simulated Public Safety Broadcast</strong>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">Digital signage and spectator devices switch to high-visibility evacuation banners.</p>
+          </div>
+        </div>
+
+        <div id="step-5" class="escalation-step">
+          <div class="level-badge">L5</div>
+          <div>
+            <strong>Level 5 — Dynamic Navigation Rerouting</strong>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">Entry Gate A is sealed off as HAZARDOUS. Routes recalculated via alternate gates.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulated Emergency Dispatch Response -->
+      <div class="glass-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="font-size: 1.15rem; font-weight: 700;">Simulated Facility Dispatch</h3>
+          <span class="badge badge-warning">Simulated Prototype</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="background: rgba(7, 11, 20, 0.7); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 4px solid #ef4444;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong>🚒 Rapid Fire Suppression Team</strong>
+              <span id="dispatch-fire-status" class="badge badge-safe">STANDBY</span>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+              Dedicated stadium fire wardens with CO2 extinguishers assigned to West Perimeter.
+            </p>
+          </div>
+
+          <div style="background: rgba(7, 11, 20, 0.7); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 4px solid #38bdf8;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong>🚑 On-Site Paramedic Unit (Alpha)</strong>
+              <span id="dispatch-med-status" class="badge badge-safe">STANDBY</span>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+              First Aid station 2 mobilized with oxygen support and trauma kits.
+            </p>
+          </div>
+
+          <div style="background: rgba(7, 11, 20, 0.7); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 4px solid #f59e0b;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong>👮 Perimeter Crowd Stewards</strong>
+              <span id="dispatch-sec-status" class="badge badge-safe">NORMAL PATROL</span>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+              Stewards ready to swing open emergency escape crash-bars at Gates NW & NE.
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem;">
+          <a href="public-alert.html" class="btn btn-primary" style="flex: 1;">📢 Launch Public Alert Broadcast</a>
+          <a href="navigation.html" class="btn btn-secondary" style="flex: 1;">🗺️ Check Alternate Routes</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Incident Log -->
+    <div class="glass-panel">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Emergency Audit Trail & System Alerts</h3>
+      <div id="active-alerts-list">
+        <!-- Injected by alertService.js -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Prototype System Notice:</strong> Dispatched services are computer software simulations for college demonstrations. This prototype does not initiate real emergency service calls or SMS alerts.
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/sensorService.js"></script>
+  <script src="js/alertService.js"></script>
+  <script src="js/simulationService.js"></script>
+  <script>
+    window.addEventListener('stadium:stateUpdated', (e) => {
+      const state = e.detail;
+      if (!state) return;
+
+      const box = document.getElementById('emergency-status-box');
+      const badge = document.getElementById('em-level-badge');
+      const title = document.getElementById('em-title');
+      const desc = document.getElementById('em-desc');
+      const srcVal = document.getElementById('em-source-val');
+
+      const steps = [1, 2, 3, 4, 5].map(i => document.getElementById(`step-${i}`));
+      const fireStatus = document.getElementById('dispatch-fire-status');
+      const medStatus = document.getElementById('dispatch-med-status');
+      const secStatus = document.getElementById('dispatch-sec-status');
+
+      if (state.emergency && state.emergency.active) {
+        box.style.border = '2px solid #ef4444';
+        box.style.background = 'linear-gradient(135deg, rgba(185, 28, 28, 0.4), rgba(15, 23, 42, 0.95))';
+        badge.textContent = '🚨 LEVEL 5 CRITICAL EMERGENCY';
+        badge.className = 'badge badge-danger blink-fast';
+        title.textContent = state.emergency.type || 'FIRE EMERGENCY ACTIVATED';
+        title.style.color = '#ef4444';
+        desc.textContent = state.emergency.message || 'Critical hazard active in monitored sector. Automatic diversion engaged.';
+        srcVal.textContent = state.emergency.source || 'STADIUMSAFE-ESP32-01';
+
+        steps.forEach(s => s.classList.add('active-step'));
+        if (fireStatus) { fireStatus.textContent = 'DISPATCHED'; fireStatus.className = 'badge badge-danger'; }
+        if (medStatus) { medStatus.textContent = 'EN ROUTE'; medStatus.className = 'badge badge-danger'; }
+        if (secStatus) { secStatus.textContent = 'EVACUATION POST'; secStatus.className = 'badge badge-warning'; }
+      } else {
+        box.style.border = '1px solid var(--border-card)';
+        box.style.background = 'var(--bg-card)';
+        badge.textContent = 'ALL SYSTEMS SECURE';
+        badge.className = 'badge badge-success';
+        title.textContent = 'No Active Threats Detected';
+        title.style.color = 'var(--text-primary)';
+        desc.textContent = 'ESP32 flame sensor and environmental monitors reporting normal parameters.';
+        srcVal.textContent = state.activeDeviceId || 'STADIUMSAFE-ESP32-01';
+
+        steps.forEach(s => s.classList.remove('active-step'));
+        if (fireStatus) { fireStatus.textContent = 'STANDBY'; fireStatus.className = 'badge badge-safe'; }
+        if (medStatus) { medStatus.textContent = 'STANDBY'; medStatus.className = 'badge badge-safe'; }
+        if (secStatus) { secStatus.textContent = 'NORMAL PATROL'; secStatus.className = 'badge badge-safe'; }
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,221 @@
+{
+  "stadium": {
+    "id": "STAD-METRO-01",
+    "name": "Metropolis National Stadium",
+    "city": "Metropolis",
+    "totalCapacity": 65000,
+    "currentOccupancy": 42180,
+    "safetyStatus": "NORMAL",
+    "lastInspection": "2026-10-25"
+  },
+  "zones": [
+    {
+      "id": "ZONE-GATE-A",
+      "name": "Entry Gate A",
+      "type": "entry_gate",
+      "capacity": 5000,
+      "currentCount": 1820,
+      "densityScore": 36,
+      "status": "NORMAL",
+      "assignedEspDevice": "STADIUMSAFE-ESP32-01",
+      "coordinates": { "x": 120, "y": 380 },
+      "isEmergencyExit": true
+    },
+    {
+      "id": "ZONE-GATE-B",
+      "name": "Entry Gate B",
+      "type": "entry_gate",
+      "capacity": 5000,
+      "currentCount": 2100,
+      "densityScore": 42,
+      "status": "NORMAL",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 880, "y": 380 },
+      "isEmergencyExit": true
+    },
+    {
+      "id": "ZONE-GATE-C",
+      "name": "Entry Gate C (VIP / Staff)",
+      "type": "entry_gate",
+      "capacity": 2000,
+      "currentCount": 650,
+      "densityScore": 32,
+      "status": "NORMAL",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 500, "y": 680 },
+      "isEmergencyExit": true
+    },
+    {
+      "id": "ZONE-CONCOURSE-NORTH",
+      "name": "North Main Concourse",
+      "type": "concourse",
+      "capacity": 15000,
+      "currentCount": 8900,
+      "densityScore": 59,
+      "status": "MODERATE",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 500, "y": 200 },
+      "isEmergencyExit": false
+    },
+    {
+      "id": "ZONE-STAND-A",
+      "name": "West Stand (Sections 101-115)",
+      "type": "stand",
+      "capacity": 18000,
+      "currentCount": 12400,
+      "densityScore": 68,
+      "status": "MODERATE",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 260, "y": 380 },
+      "isEmergencyExit": false
+    },
+    {
+      "id": "ZONE-STAND-B",
+      "name": "East Stand (Sections 116-130)",
+      "type": "stand",
+      "capacity": 18000,
+      "currentCount": 11800,
+      "densityScore": 65,
+      "status": "MODERATE",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 740, "y": 380 },
+      "isEmergencyExit": false
+    },
+    {
+      "id": "ZONE-FOOD-COURT",
+      "name": "Food & Beverage Plaza",
+      "type": "amenity",
+      "capacity": 4000,
+      "currentCount": 2900,
+      "densityScore": 72,
+      "status": "HIGH",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 500, "y": 380 },
+      "isEmergencyExit": false
+    },
+    {
+      "id": "ZONE-EMERGENCY-EXIT-1",
+      "name": "Emergency Exit North-West",
+      "type": "emergency_exit",
+      "capacity": 6000,
+      "currentCount": 200,
+      "densityScore": 3,
+      "status": "CLEAR",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 160, "y": 140 },
+      "isEmergencyExit": true
+    },
+    {
+      "id": "ZONE-EMERGENCY-EXIT-2",
+      "name": "Emergency Exit North-East",
+      "type": "emergency_exit",
+      "capacity": 6000,
+      "currentCount": 180,
+      "densityScore": 3,
+      "status": "CLEAR",
+      "assignedEspDevice": null,
+      "coordinates": { "x": 840, "y": 140 },
+      "isEmergencyExit": true
+    }
+  ],
+  "navigationGraph": {
+    "nodes": [
+      { "id": "GATE_A", "label": "Entry Gate A (ESP32 Zone)", "x": 120, "y": 380, "isHazardous": false },
+      { "id": "STAND_A", "label": "West Stand", "x": 260, "y": 380, "isHazardous": false },
+      { "id": "CONCOURSE_N", "label": "North Concourse", "x": 500, "y": 200, "isHazardous": false },
+      { "id": "FOOD_COURT", "label": "Food Court", "x": 500, "y": 380, "isHazardous": false },
+      { "id": "CONCOURSE_S", "label": "South Concourse / Gate C", "x": 500, "y": 580, "isHazardous": false },
+      { "id": "STAND_B", "label": "East Stand", "x": 740, "y": 380, "isHazardous": false },
+      { "id": "GATE_B", "label": "Entry Gate B", "x": 880, "y": 380, "isHazardous": false },
+      { "id": "EMERGENCY_NW", "label": "Emergency Exit NW", "x": 160, "y": 140, "isHazardous": false },
+      { "id": "EMERGENCY_NE", "label": "Emergency Exit NE", "x": 840, "y": 140, "isHazardous": false }
+    ],
+    "edges": [
+      { "from": "GATE_A", "to": "STAND_A", "distance": 45 },
+      { "from": "GATE_A", "to": "EMERGENCY_NW", "distance": 60 },
+      { "from": "STAND_A", "to": "CONCOURSE_N", "distance": 70 },
+      { "from": "STAND_A", "to": "FOOD_COURT", "distance": 55 },
+      { "from": "STAND_A", "to": "CONCOURSE_S", "distance": 75 },
+      { "from": "CONCOURSE_N", "to": "EMERGENCY_NW", "distance": 50 },
+      { "from": "CONCOURSE_N", "to": "EMERGENCY_NE", "distance": 50 },
+      { "from": "CONCOURSE_N", "to": "FOOD_COURT", "distance": 40 },
+      { "from": "FOOD_COURT", "to": "STAND_B", "distance": 55 },
+      { "from": "FOOD_COURT", "to": "CONCOURSE_S", "distance": 45 },
+      { "from": "STAND_B", "to": "GATE_B", "distance": 45 },
+      { "from": "STAND_B", "to": "EMERGENCY_NE", "distance": 65 },
+      { "from": "STAND_B", "to": "CONCOURSE_N", "distance": 70 },
+      { "from": "STAND_B", "to": "CONCOURSE_S", "distance": 75 },
+      { "from": "GATE_B", "to": "EMERGENCY_NE", "distance": 60 }
+    ]
+  },
+  "parkingLots": [
+    {
+      "id": "LOT-A",
+      "name": "Parking Lot A (West Ground)",
+      "totalSlots": 20,
+      "occupiedSlots": 13,
+      "nearestGate": "Entry Gate A",
+      "irSensorSlot": "A-01",
+      "slots": [
+        { "id": "A-01", "number": 1, "status": "OCCUPIED", "evCharging": true, "accessible": true },
+        { "id": "A-02", "number": 2, "status": "AVAILABLE", "evCharging": true, "accessible": true },
+        { "id": "A-03", "number": 3, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-04", "number": 4, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-05", "number": 5, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "A-06", "number": 6, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "A-07", "number": 7, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-08", "number": 8, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-09", "number": 9, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "A-10", "number": 10, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-11", "number": 11, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-12", "number": 12, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-13", "number": 13, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "A-14", "number": 14, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "A-15", "number": 15, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-16", "number": 16, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-17", "number": 17, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-18", "number": 18, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "A-19", "number": 19, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "A-20", "number": 20, "status": "OCCUPIED", "evCharging": false, "accessible": false }
+      ]
+    },
+    {
+      "id": "LOT-B",
+      "name": "Parking Lot B (East Multi-level)",
+      "totalSlots": 20,
+      "occupiedSlots": 8,
+      "nearestGate": "Entry Gate B",
+      "irSensorSlot": null,
+      "slots": [
+        { "id": "B-01", "number": 21, "status": "OCCUPIED", "evCharging": true, "accessible": false },
+        { "id": "B-02", "number": 22, "status": "AVAILABLE", "evCharging": true, "accessible": false },
+        { "id": "B-03", "number": 23, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-04", "number": 24, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-05", "number": 25, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "B-06", "number": 26, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "B-07", "number": 27, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-08", "number": 28, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-09", "number": 29, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "B-10", "number": 30, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-11", "number": 31, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-12", "number": 32, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "B-13", "number": 33, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-14", "number": 34, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-15", "number": 35, "status": "OCCUPIED", "evCharging": false, "accessible": false },
+        { "id": "B-16", "number": 36, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-17", "number": 37, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-18", "number": 38, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-19", "number": 39, "status": "AVAILABLE", "evCharging": false, "accessible": false },
+        { "id": "B-20", "number": 40, "status": "OCCUPIED", "evCharging": false, "accessible": false }
+      ]
+    }
+  ],
+  "sampleSeats": [
+    { "seatId": "SEC102-R12-S08", "section": "West Stand Lower", "row": "12", "seat": "08", "nearestGate": "GATE_A", "gateName": "Entry Gate A" },
+    { "seatId": "SEC108-R05-S14", "section": "West Stand Upper", "row": "05", "seat": "14", "nearestGate": "GATE_A", "gateName": "Entry Gate A" },
+    { "seatId": "SEC120-R03-S22", "section": "East Stand Lower", "row": "03", "seat": "22", "nearestGate": "GATE_B", "gateName": "Entry Gate B" },
+    { "seatId": "SEC125-R15-S01", "section": "East Stand Upper", "row": "15", "seat": "01", "nearestGate": "GATE_B", "gateName": "Entry Gate B" },
+    { "seatId": "VIP-BOX-NORTH-04", "section": "VIP Executive Suite", "row": "01", "seat": "04", "nearestGate": "CONCOURSE_S", "gateName": "Entry Gate C (VIP)" }
+  ]
+}
+

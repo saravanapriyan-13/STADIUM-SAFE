@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stadium Command Dashboard — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .metric-value-huge {
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin: 0.25rem 0;
+    }
+    .quick-sensor-preview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .preview-box {
+      background: rgba(7, 11, 20, 0.7);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .preview-label { font-size: 0.7rem; color: var(--text-muted); }
+    .preview-val { font-size: 1rem; font-weight: 800; color: var(--accent-cyan); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">Main Operations Console</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-esp-mode" class="badge badge-muted">STANDBY</span>
+        <span id="global-data-badge" class="badge badge-muted">OFFLINE</span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="sensors.html" class="nav-link">⚡ Live ESP32</a>
+        <a href="crowd.html" class="nav-link">Crowd</a>
+        <a href="parking.html" class="nav-link">Parking</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="emergency.html" class="nav-link">Emergency</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Emergency Flash Banner -->
+  <div id="global-emergency-banner" class="emergency-banner hidden"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">STADIUM OVERVIEW & SAFETY MATRIX</h1>
+        <p class="page-subtitle">Metropolis National Stadium — 65,000 Capacity Intelligent Venue Management</p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="sensors.html" class="btn btn-primary">⚡ ESP32 Telemetry Hub</a>
+        <button id="btn-quick-sos" class="btn btn-danger" onclick="triggerQuickSos()">🚨 Quick SOS Alert</button>
+      </div>
+    </div>
+
+    <!-- 4 High-level Overview Cards -->
+    <div class="grid-4" style="margin-bottom: 2rem;">
+      <!-- Total Attendance -->
+      <div class="glass-panel">
+        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Stadium Attendance</span>
+        <div class="metric-value-huge" style="color: #38bdf8;">42,180</div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary);">64.8% of 65,000 Seats</div>
+        <div class="sensor-bar-bg" style="margin-top: 0.75rem;">
+          <div class="sensor-bar-fill" style="width: 65%; background-color: #38bdf8;"></div>
+        </div>
+      </div>
+
+      <!-- Real ESP32 Monitored Zone (Gate A) -->
+      <div class="glass-panel" id="gate-a-summary-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Entry Gate A</span>
+          <span class="badge badge-safe">ESP32-01</span>
+        </div>
+        <div id="gate-a-density-val" class="metric-value-huge" style="color: #34d399;">36%</div>
+        <div id="gate-a-status-label" style="font-size: 0.8rem; color: var(--text-secondary);">Local Density: NORMAL</div>
+        <div class="quick-sensor-preview">
+          <div class="preview-box">
+            <div class="preview-label">DIST</div>
+            <div id="mini-dist-val" class="preview-val">--</div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-label">FLAME</div>
+            <div id="mini-flame-val" class="preview-val" style="color: #34d399;">SAFE</div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-label">MQ135</div>
+            <div id="mini-mq-val" class="preview-val">--</div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-label">IR</div>
+            <div id="mini-ir-val" class="preview-val">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Parking Status -->
+      <div class="glass-panel">
+        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Parking Vacancy</span>
+        <div id="dash-parking-val" class="metric-value-huge" style="color: #a78bfa;">19 / 40</div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary);">Lot A & Lot B Available Slots</div>
+        <div style="margin-top: 0.75rem;">
+          <a href="parking.html" class="btn btn-sm btn-secondary" style="width: 100%;">Inspect Lots</a>
+        </div>
+      </div>
+
+      <!-- Active Threats / Safety Score -->
+      <div class="glass-panel" id="dash-safety-panel">
+        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Facility Safety Index</span>
+        <div id="dash-safety-score" class="metric-value-huge" style="color: #10b981;">98%</div>
+        <div id="dash-safety-status" style="font-size: 0.8rem; color: var(--text-secondary);">Facility State: NORMAL</div>
+        <div style="margin-top: 0.75rem;">
+          <span id="dash-active-alerts-count" class="badge badge-success">0 Active Alerts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROWD HEATMAP & SECTOR DENSITY GRID -->
+    <div class="glass-panel" style="margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h2 style="font-size: 1.2rem; font-weight: 700;">Stadium Sector Density Overview</h2>
+          <span style="font-size: 0.8rem; color: var(--text-secondary);">Gate A reflects live ESP32 ultrasonic crowd telemetry</span>
+        </div>
+        <a href="crowd.html" class="btn btn-sm btn-secondary">Detailed Crowd Analytics</a>
+      </div>
+
+      <div class="grid-3" id="zones-summary-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- RECENT CRITICAL ALERTS -->
+    <div class="glass-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h2 style="font-size: 1.2rem; font-weight: 700;">Active Stadium Alerts & Dispatch Feed</h2>
+          <span style="font-size: 0.8rem; color: var(--text-secondary);">Simulated emergency dispatch & spectator notices</span>
+        </div>
+        <span id="alerts-count-badge" class="badge badge-safe">0</span>
+      </div>
+      <div id="active-alerts-list">
+        <!-- Injected by AlertService -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Prototype System Notice:</strong> Sensor readings and emergency decisions are for demonstration purposes only. This system is not a certified life-safety or fire-detection system.
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/sensorService.js"></script>
+  <script src="js/alertService.js"></script>
+  <script src="js/simulationService.js"></script>
+  <script>
+    async function loadZones() {
+      try {
+        const url = window.getApiUrl ? window.getApiUrl('/api/crowd') : '/api/crowd';
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.zones) {
+          renderZones(data.zones);
+        }
+      } catch (e) {}
+    }
+
+    function renderZones(zones) {
+      const grid = document.getElementById('zones-summary-grid');
+      if (!grid) return;
+
+      grid.innerHTML = zones.slice(0, 6).map(zone => {
+        const isEsp = zone.id === 'ZONE-GATE-A';
+        const color = zone.densityScore > 80 ? '#ef4444' : zone.densityScore > 60 ? '#f59e0b' : '#34d399';
+
+        return `
+          <div style="background: rgba(7, 11, 20, 0.7); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong>${zone.name}</strong>
+              ${isEsp ? '<span class="badge badge-safe">ESP32 SENSOR</span>' : ''}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 0.5rem;">
+              <span style="font-size: 1.5rem; font-weight: 800; color: ${color};">${zone.densityScore}%</span>
+              <span style="font-size: 0.8rem; color: var(--text-secondary);">${zone.status}</span>
+            </div>
+            <div class="sensor-bar-bg" style="margin-top: 0.5rem;">
+              <div class="sensor-bar-fill" style="width: ${zone.densityScore}%; background-color: ${color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function triggerQuickSos() {
+      window.AlertService.triggerSos('SEAT-SEC102-R12-S08', 'General Security / Medical Emergency', 'Spectator requested immediate staff response from dashboard.');
+    }
+
+    // Listen for live sensor telemetry to update Mini Snapshot
+    window.addEventListener('stadium:stateUpdated', (e) => {
+      const state = e.detail;
+      if (!state || !state.sensorData) return;
+
+      const { distance_cm, flame, mq135_raw, ir_detected } = state.sensorData;
+      const { crowdScore, crowdLevel, fireEmergency } = state.fusion;
+
+      // Update Gate A Density
+      const gateScoreEl = document.getElementById('gate-a-density-val');
+      const gateLabelEl = document.getElementById('gate-a-status-label');
+      const gatePanel = document.getElementById('gate-a-summary-panel');
+
+      if (gateScoreEl) gateScoreEl.textContent = `${crowdScore}%`;
+      if (gateLabelEl) gateLabelEl.textContent = `Local Density: ${crowdLevel}`;
+
+      const miniDist = document.getElementById('mini-dist-val');
+      const miniFlame = document.getElementById('mini-flame-val');
+      const miniMq = document.getElementById('mini-mq-val');
+      const miniIr = document.getElementById('mini-ir-val');
+
+      if (miniDist && typeof distance_cm === 'number') miniDist.textContent = `${Math.round(distance_cm)}cm`;
+      if (miniMq && typeof mq135_raw === 'number') miniMq.textContent = mq135_raw;
+      if (miniIr) miniIr.textContent = ir_detected ? 'DETECT' : 'CLEAR';
+
+      if (miniFlame) {
+        if (flame) {
+          miniFlame.textContent = 'FIRE!';
+          miniFlame.style.color = '#ef4444';
+          gatePanel.style.borderColor = '#ef4444';
+        } else {
+          miniFlame.textContent = 'SAFE';
+          miniFlame.style.color = '#34d399';
+          gatePanel.style.borderColor = 'rgba(56, 189, 248, 0.15)';
+        }
+      }
+
+      // Safety Index update
+      const safetyScoreEl = document.getElementById('dash-safety-score');
+      const safetyStatusEl = document.getElementById('dash-safety-status');
+      if (safetyScoreEl && safetyStatusEl) {
+        if (fireEmergency || (state.emergency && state.emergency.active)) {
+          safetyScoreEl.textContent = '24%';
+          safetyScoreEl.style.color = '#ef4444';
+          safetyStatusEl.textContent = 'FACILITY EMERGENCY ACTIVE';
+        } else {
+          safetyScoreEl.textContent = '98%';
+          safetyScoreEl.style.color = '#10b981';
+          safetyStatusEl.textContent = 'Facility State: NORMAL';
+        }
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadZones);
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Seat Locator & Spectator Mobile View — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .ticket-card {
+      background: linear-gradient(135deg, rgba(16, 24, 44, 0.95), rgba(9, 14, 26, 0.95));
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+    .qr-box {
+      width: 180px;
+      height: 180px;
+      margin: 1.5rem auto;
+      background: #fff;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .seat-badge-big {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--accent-cyan);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">Spectator Portal</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-esp-mode" class="badge badge-muted">STANDBY</span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="sensors.html" class="nav-link">⚡ Live ESP32</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="qr-seat.html" class="nav-link active">QR Seat</a>
+        <a href="public-alert.html" class="nav-link">Public Alert</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="global-emergency-banner" class="emergency-banner hidden"></div>
+
+  <main class="main-content">
+    <div class="page-header" style="text-align: center; justify-content: center;">
+      <div>
+        <h1 class="page-title">DIGITAL TICKET & QR SEAT LOCATOR</h1>
+        <p class="page-subtitle">Simulate spectator smartphone check-in, seat navigation, and seat-side emergency SOS.</p>
+      </div>
+    </div>
+
+    <!-- Ticket Card -->
+    <div class="ticket-card glass-panel">
+      <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">
+        Matchday Pass • Metropolis National Arena
+      </div>
+      <h2 style="font-size: 1.3rem; font-weight: 800; margin: 0.25rem 0;">CHAMPIONSHIP FINALS 2026</h2>
+
+      <div class="qr-box">
+        <!-- SVG QR Code Vector -->
+        <svg viewBox="0 0 100 100" width="160" height="160" style="display: block;">
+          <rect width="100" height="100" fill="#ffffff" />
+          <path d="M10,10 h25 v25 h-25 z M15,15 v15 h15 v-15 z M19,19 h7 v7 h-7 z" fill="#000000" />
+          <path d="M65,10 h25 v25 h-25 z M70,15 v15 h15 v-15 z M74,19 h7 v7 h-7 z" fill="#000000" />
+          <path d="M10,65 h25 v25 h-25 z M15,70 v15 h15 v-15 z M19,74 h7 v7 h-7 z" fill="#000000" />
+          <path d="M40,10 h15 v5 h-15 z M45,20 h10 v15 h-10 z M10,40 h10 v10 h-10 z M25,45 h15 v10 h-15 z M45,45 h10 v10 h-10 z M65,40 h15 v10 h-15 z M85,45 h5 v10 h-5 z M40,65 h10 v15 h-10 z M55,65 h15 v5 h-15 z M75,65 h15 v10 h-15 z M40,85 h20 v5 h-20 z M70,80 h15 v10 h-15 z" fill="#000000" />
+        </svg>
+      </div>
+
+      <div class="seat-badge-big" id="ticket-seat-id">SEC 102 • ROW 12 • SEAT 08</div>
+      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+        West Stand (Lower Tier) • Nearest Turnstile: <strong>Entry Gate A</strong>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+        <a href="navigation.html" class="btn btn-primary" style="flex: 1;">
+          🧭 Navigate to My Seat
+        </a>
+        <button class="btn btn-danger" onclick="triggerSeatSos()" style="flex: 1;">
+          🚨 Seat SOS Alert
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Academic Note:</strong> Demonstrates visitor-facing mobile view with direct seat-based indoor wayfinding and location-tagged emergency SOS dispatch.
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/alertService.js"></script>
+  <script>
+    function triggerSeatSos() {
+      const seat = document.getElementById('ticket-seat-id').textContent;
+      window.AlertService.triggerSos(seat, 'Visitor Medical Distress / Safety SOS', 'Seat-side SOS trigger pressed from visitor mobile portal.');
+    }
+  </script>
+</body>
+</html>
+

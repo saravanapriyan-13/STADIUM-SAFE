@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Safety Broadcast — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background: #040810;
+    }
+    .broadcast-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      text-align: center;
+      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border-card);
+      transition: all 0.3s ease;
+    }
+    .broadcast-normal {
+      background: rgba(16, 24, 44, 0.8);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .broadcast-emergency {
+      background: linear-gradient(180deg, #7f1d1d, #450a0a) !important;
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 50px rgba(239, 68, 68, 0.8);
+      animation: emergencyFlash 1s infinite alternate;
+    }
+    @keyframes emergencyFlash {
+      from { border-color: #ef4444; }
+      to { border-color: #ffffff; }
+    }
+    .broadcast-headline {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .broadcast-message {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      color: #e2e8f0;
+    }
+    .evacuation-routes-box {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      text-align: left;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">Public Safety Display</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="sensors.html" class="nav-link">⚡ Live ESP32</a>
+        <a href="emergency.html" class="nav-link">Emergency</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="public-alert.html" class="nav-link active">Public Alert</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div id="broadcast-screen" class="broadcast-container broadcast-normal">
+      <div id="broadcast-icon" style="font-size: 4rem; margin-bottom: 0.5rem;">🟢</div>
+      <h1 id="broadcast-title" class="broadcast-headline" style="color: #34d399;">
+        ALL VENUE SECTORS NORMAL
+      </h1>
+      <p id="broadcast-body" class="broadcast-message">
+        Welcome to Metropolis National Stadium. All access turnstiles and concourses are functioning with optimal safety parameters. Please keep walkways clear.
+      </p>
+
+      <div id="evacuation-guide" style="display: none;" class="evacuation-routes-box">
+        <h3 style="color: #f87171; font-size: 1.2rem; margin-bottom: 0.5rem;">⚠️ IMMEDIATE EVACUATION INSTRUCTIONS:</h3>
+        <ul style="margin-left: 1.5rem; line-height: 1.8; font-size: 1rem;">
+          <li><strong style="color: #ef4444;">DO NOT USE ENTRY GATE A</strong> — Zone sealed as hazardous.</li>
+          <li>Spectators in <strong>West Stand</strong>: Proceed to <strong>Emergency Exit North-West</strong>.</li>
+          <li>Spectators in <strong>East Stand</strong>: Proceed to <strong>Emergency Exit North-East or Gate B</strong>.</li>
+          <li>Follow illuminated emergency exit signs and verbal instructions from safety stewards.</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <span id="broadcast-stamp" style="font-size: 0.8rem; color: var(--text-muted);">
+          Broadcast Feed Active • Connected to Central Stadium Safety Hub
+        </span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Prototype Note:</strong> Simulated digital signage display for stadium jumbotrons, LED ribbons, and visitor public emergency broadcasts.
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/sensorService.js"></script>
+  <script>
+    window.addEventListener('stadium:stateUpdated', (e) => {
+      const state = e.detail;
+      if (!state) return;
+
+      const screen = document.getElementById('broadcast-screen');
+      const icon = document.getElementById('broadcast-icon');
+      const title = document.getElementById('broadcast-title');
+      const body = document.getElementById('broadcast-body');
+      const evacGuide = document.getElementById('evacuation-guide');
+      const stamp = document.getElementById('broadcast-stamp');
+
+      if (state.emergency && state.emergency.active) {
+        screen.className = 'broadcast-container broadcast-emergency';
+        icon.textContent = '🔥';
+        title.textContent = '⚠️ EMERGENCY SAFETY ALERT ⚠️';
+        title.style.color = '#ffffff';
+        body.innerHTML = `
+          <strong>CRITICAL HAZARD DETECTED IN ${state.emergency.zone ? state.emergency.zone.toUpperCase() : 'SECTOR A'}!</strong><br>
+          Optical flame sensor triggered an automatic evacuation protocol.<br>
+          Please remain calm, follow staff instructions, and proceed to the nearest designated exit.
+        `;
+        evacGuide.style.display = 'block';
+        stamp.textContent = `CRITICAL BROADCAST TRANSMITTED • Time: ${new Date().toLocaleTimeString()}`;
+      } else {
+        screen.className = 'broadcast-container broadcast-normal';
+        icon.textContent = '🟢';
+        title.textContent = 'ALL VENUE SECTORS NORMAL';
+        title.style.color = '#34d399';
+        body.textContent = 'Welcome to Metropolis National Stadium. All access turnstiles and concourses are functioning with optimal safety parameters. Please keep walkways clear.';
+        evacGuide.style.display = 'none';
+        stamp.textContent = `Broadcast Feed Active • Connected to Central Stadium Safety Hub`;
+      }
+    });
+  </script>
+</body>
+</html>
+

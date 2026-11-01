@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Parking Grid — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">Smart Parking System</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-esp-mode" class="badge badge-muted">STANDBY</span>
+        <span id="global-data-badge" class="badge badge-muted">OFFLINE</span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="sensors.html" class="nav-link">⚡ Live ESP32</a>
+        <a href="crowd.html" class="nav-link">Crowd</a>
+        <a href="parking.html" class="nav-link active">Parking</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="emergency.html" class="nav-link">Emergency</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="global-emergency-banner" class="emergency-banner hidden"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">STADIUM SMART PARKING & SENSOR LINK</h1>
+        <p class="page-subtitle">Real-time stall availability across Ground Lot A & Multi-level Lot B.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="badge badge-safe"><span id="total-available-slots">--</span> Vacant Stalls</span>
+        <button class="btn btn-secondary" onclick="window.SimulationService.simulateParkingChange()">⚡ Randomize Demo Slots</button>
+      </div>
+    </div>
+
+    <!-- Hardware IR Sensor Link Highlight -->
+    <div class="glass-panel" style="border-color: rgba(56, 189, 248, 0.4); margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span class="badge badge-success">ESP32 HARDWARE INTEGRATION</span>
+          <h2 style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">Stall A-01 Linked to Physical IR Sensor</h2>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">
+            Place an obstacle in front of the ESP32 IR Sensor (GPIO 23). Stall <strong>A-01</strong> will dynamically switch from <strong>VACANT (Green)</strong> to <strong>OCCUPIED (Red)</strong>.
+          </p>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">IR Hardware Telemetry</div>
+          <div id="ir-live-status-pill" class="badge badge-safe" style="font-size: 1rem; padding: 0.4rem 0.8rem; margin-top: 0.25rem;">
+            IR SENSOR: STANDBY
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parking Lots Grid Container (populated by parkingService.js) -->
+    <div id="parking-lots-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <!-- Populated dynamically -->
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Prototype Note:</strong> Slot A-01 receives real hardware pulses from the ESP32 IR Obstacle detector. Other slots simulate typical match-day vacancy distributions.
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/sensorService.js"></script>
+  <script src="js/parkingService.js"></script>
+  <script src="js/simulationService.js"></script>
+  <script>
+    window.addEventListener('stadium:stateUpdated', (e) => {
+      const state = e.detail;
+      if (!state || !state.sensorData) return;
+
+      const irPill = document.getElementById('ir-live-status-pill');
+      if (irPill) {
+        if (state.sensorData.ir_detected) {
+          irPill.textContent = '🚗 VEHICLE / OBJECT DETECTED';
+          irPill.className = 'badge badge-danger';
+        } else {
+          irPill.textContent = '🟢 STALL VACANT (CLEAR)';
+          irPill.className = 'badge badge-success';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

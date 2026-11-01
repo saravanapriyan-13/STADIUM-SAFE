@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live ESP32 Sensors — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+    canvas {
+      width: 100%;
+      height: 200px;
+      display: block;
+    }
+    .config-badge {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">ESP32 Hardware Hub</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-esp-mode" class="badge badge-muted">STANDBY</span>
+        <span id="global-data-badge" class="badge badge-muted">OFFLINE</span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="sensors.html" class="nav-link active">⚡ Live ESP32</a>
+        <a href="crowd.html" class="nav-link">Crowd</a>
+        <a href="parking.html" class="nav-link">Parking</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="emergency.html" class="nav-link">Emergency</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Emergency Banner -->
+  <div id="global-emergency-banner" class="emergency-banner hidden"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">LIVE ESP32 SENSOR HUB</h1>
+        <p class="page-subtitle">Real-time hardware telemetry via Web Serial API or Local Wi-Fi HTTP streaming.</p>
+      </div>
+      <div id="connection-meta-header" class="status-pill status-pill-disconnected">
+        <span id="live-time-ago">No sensor packets yet</span>
+      </div>
+    </div>
+
+    <!-- DEDICATED HARDWARE CONNECTION PANEL -->
+    <div class="connection-panel">
+      <div class="panel-header">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700;">ESP32 HARDWARE LINK</h2>
+          <span style="font-size: 0.8rem; color: var(--text-secondary);">Select physical connection method</span>
+        </div>
+        <div class="mode-selector">
+          <button id="mode-tab-usb" class="mode-btn active" onclick="switchMode('USB')">🔌 USB / COM (Web Serial)</button>
+          <button id="mode-tab-wifi" class="mode-btn" onclick="switchMode('WIFI')">📶 Wi-Fi HTTP / Local IP</button>
+        </div>
+      </div>
+
+      <!-- Mode 1: USB Serial Panel -->
+      <div id="panel-usb-body">
+        <div class="connection-body">
+          <div>
+            <div class="form-group">
+              <label class="form-label">Serial Baud Rate</label>
+              <select id="usb-baud-rate" class="form-control">
+                <option value="115200" selected>115200 (Firmware Default)</option>
+                <option value="9600">9600</option>
+                <option value="57600">57600</option>
+                <option value="230400">230400</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <button id="usb-connect-btn" class="btn btn-primary" onclick="connectUsbSerial()">
+                ⚡ CONNECT ESP32
+              </button>
+              <button id="usb-disconnect-btn" class="btn btn-secondary" onclick="disconnectUsbSerial()" disabled>
+                DISCONNECT
+              </button>
+            </div>
+          </div>
+          <div style="background: rgba(7, 11, 20, 0.6); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem;">USB Status:</div>
+            <div id="usb-status-indicator" class="status-badge status-disconnected" style="font-weight: 800; font-size: 1.1rem; color: #f87171;">
+              🔴 DISCONNECTED
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
+              * Note: The browser will ask permission to access your COM port via the <strong>Web Serial API</strong>. Please close Arduino Serial Monitor first.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode 2: Wi-Fi HTTP Panel -->
+      <div id="panel-wifi-body" style="display: none;">
+        <div class="connection-body">
+          <div>
+            <div class="form-group">
+              <label class="form-label">ESP32 IP Address</label>
+              <input type="text" id="wifi-ip-input" class="form-control" value="192.168.1.100" placeholder="e.g. 192.168.1.100 or 10.0.0.55">
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <button id="wifi-connect-btn" class="btn btn-primary" onclick="connectWifi()">
+                📶 CONNECT ESP32 WI-FI
+              </button>
+              <button id="wifi-disconnect-btn" class="btn btn-secondary" onclick="disconnectWifi()" disabled>
+                DISCONNECT
+              </button>
+            </div>
+          </div>
+          <div style="background: rgba(7, 11, 20, 0.6); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem;">Wi-Fi Status:</div>
+            <div id="wifi-status-indicator" class="status-badge status-disconnected" style="font-weight: 800; font-size: 1.1rem; color: #f87171;">
+              🔴 DISCONNECTED
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
+              * Check your ESP32 Serial Monitor to find the local IP address assigned by your router. Make sure PC and ESP32 share the same Wi-Fi.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOUR LARGE SENSOR TELEMETRY CARDS -->
+    <div class="sensor-grid">
+      <!-- 1. ULTRASONIC SENSOR CARD -->
+      <div class="sensor-card">
+        <div class="sensor-card-header">
+          <span class="sensor-title">📏 CROWD DISTANCE (HC-SR04)</span>
+          <span class="badge badge-safe">PIN 5 / 18</span>
+        </div>
+        <div>
+          <div class="sensor-value-large">
+            <span id="card-dist-val">--</span><span class="sensor-unit">cm</span>
+          </div>
+          <div id="card-dist-status" class="sensor-status-badge badge-success">
+            STANDBY
+          </div>
+          <div class="sensor-bar-bg">
+            <div id="card-dist-bar" class="sensor-bar-fill" style="width: 50%;"></div>
+          </div>
+        </div>
+        <div class="config-badge">
+          Thresholds: &gt;100cm LOW | 50-100cm MODERATE | &lt;50cm HIGH | &lt;25cm CRITICAL
+        </div>
+      </div>
+
+      <!-- 2. FLAME SENSOR CARD -->
+      <div id="card-flame-panel" class="sensor-card sensor-card-fire">
+        <div class="sensor-card-header">
+          <span class="sensor-title">🔥 FIRE SENSOR (OPTICAL)</span>
+          <span class="badge badge-safe">GPIO 19</span>
+        </div>
+        <div>
+          <div id="card-flame-value" class="sensor-value-large" style="color: #34d399;">
+            SAFE
+          </div>
+          <div id="card-flame-badge" class="sensor-status-badge badge-success">
+            🟢 No flame detected
+          </div>
+          <p id="card-flame-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            Optical infrared flame detection is active.
+          </p>
+        </div>
+        <div class="config-badge">
+          Logic: FLAME_ACTIVE_LEVEL LOW | Auto Level 5 Escalation
+        </div>
+      </div>
+
+      <!-- 3. MQ135 AIR QUALITY SENSOR CARD -->
+      <div class="sensor-card">
+        <div class="sensor-card-header">
+          <span class="sensor-title">🌫️ AIR QUALITY (MQ135)</span>
+          <span class="badge badge-safe">ADC1 GPIO 34</span>
+        </div>
+        <div>
+          <div class="sensor-value-large">
+            <span id="card-mq135-val">--</span><span class="sensor-unit">Raw ADC</span>
+          </div>
+          <div id="card-mq135-badge" class="sensor-status-badge badge-success">
+            GOOD
+          </div>
+          <div class="sensor-bar-bg">
+            <div id="card-mq135-bar" class="sensor-bar-fill" style="width: 30%;"></div>
+          </div>
+        </div>
+        <div class="config-badge">
+          Relative Scale: 0-999 Good | 1000-1999 Moderate | 2000+ Poor
+        </div>
+      </div>
+
+      <!-- 4. IR OBSTACLE SENSOR CARD -->
+      <div class="sensor-card">
+        <div class="sensor-card-header">
+          <span class="sensor-title">👤 IR OCCUPANCY SENSOR</span>
+          <span class="badge badge-safe">GPIO 23</span>
+        </div>
+        <div>
+          <div id="card-ir-val" class="sensor-value-large" style="color: #60a5fa;">
+            CLEAR
+          </div>
+          <div id="card-ir-badge" class="sensor-status-badge badge-safe">
+            ⚪ NO OBJECT
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            Used for presence fusion & parking slot occupancy.
+          </p>
+        </div>
+        <div class="config-badge">
+          Formula: Crowd = 70% Distance + 30% IR Presence
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE TELEMETRY TREND CHART -->
+    <div class="chart-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 style="font-size: 1rem; font-weight: 700;">Live Sensor Trends (Distance & MQ135)</h3>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">
+          <span style="color: #00f0ff; margin-right: 1rem;">━ Distance (cm)</span>
+          <span style="color: #f59e0b;">━ MQ135 Raw ADC (/ 20)</span>
+        </div>
+      </div>
+      <canvas id="sensor-canvas"></canvas>
+    </div>
+
+    <!-- SENSOR READING HISTORY TABLE -->
+    <div class="glass-panel" style="margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700;">Recent Sensor Telemetry Log (Last 20 Readings)</h3>
+        <span style="font-size: 0.75rem; color: var(--text-secondary);">Streamed via newline-delimited JSON</span>
+      </div>
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Distance (cm)</th>
+              <th>Flame Status</th>
+              <th>MQ135 Raw</th>
+              <th>Air Quality</th>
+              <th>IR Sensor</th>
+              <th>Crowd Score</th>
+            </tr>
+          </thead>
+          <tbody id="telemetry-history-tbody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                Awaiting connection to ESP32...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COLLAPSIBLE ESP32 DEBUG CONSOLE -->
+    <div class="debug-console">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-weight: 700; color: #94a3b8;">ESP32 DEBUG CONSOLE & RAW SERIAL STREAM</span>
+        <button class="btn btn-sm btn-secondary" onclick="clearDebugConsole()">Clear Log</button>
+      </div>
+      <div id="esp32-debug-logs" class="debug-logs-window">
+        <div class="debug-log-entry log-info">[System] Debug console initialized. Ready for ESP32 connection.</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Prototype Notice:</strong> Raw MQ-135 readings represent relative analog values, not certified PPM concentrations. Distance thresholds reflect localized test gate geometry.
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/sensorService.js"></script>
+  <script src="js/esp32Serial.js"></script>
+  <script src="js/esp32Wifi.js"></script>
+  <script src="js/simulationService.js"></script>
+
+  <script>
+    // Tab switching between USB and Wi-Fi
+    function switchMode(mode) {
+      const usbTab = document.getElementById('mode-tab-usb');
+      const wifiTab = document.getElementById('mode-tab-wifi');
+      const usbPanel = document.getElementById('panel-usb-body');
+      const wifiPanel = document.getElementById('panel-wifi-body');
+
+      if (mode === 'USB') {
+        usbTab.classList.add('active');
+        wifiTab.classList.remove('active');
+        usbPanel.style.display = 'block';
+        wifiPanel.style.display = 'none';
+      } else {
+        wifiTab.classList.add('active');
+        usbTab.classList.remove('active');
+        wifiPanel.style.display = 'block';
+        usbPanel.style.display = 'none';
+      }
+    }
+
+    // Connect USB Web Serial
+    function connectUsbSerial() {
+      const baud = document.getElementById('usb-baud-rate').value;
+      window.Esp32Serial.connect(baud);
+    }
+
+    function disconnectUsbSerial() {
+      window.Esp32Serial.disconnect();
+    }
+
+    // Connect Wi-Fi
+    function connectWifi() {
+      const ip = document.getElementById('wifi-ip-input').value;
+      window.Esp32Wifi.connect(ip);
+    }
+
+    function disconnectWifi() {
+      window.Esp32Wifi.disconnect();
+    }
+
+    function clearDebugConsole() {
+      const consoleEl = document.getElementById('esp32-debug-logs');
+      if (consoleEl) consoleEl.innerHTML = '';
+    }
+
+    // Telemetry History Queue
+    const historyList = [];
+    const maxHistory = 20;
+
+    // Canvas Chart setup
+    const canvas = document.getElementById('sensor-canvas');
+    const ctx = canvas.getContext('2d');
+    const chartHistory = [];
+    const maxChartPoints = 40;
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = 180;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function renderCanvasChart() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (chartHistory.length < 2) return;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const step = w / (maxChartPoints - 1);
+
+      // Draw Distance Line (Cyan)
+      ctx.beginPath();
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < chartHistory.length; i++) {
+        const x = i * step;
+        // scale distance 0 - 200cm
+        const normDist = Math.max(0, Math.min(200, chartHistory[i].distance));
+        const y = h - (normDist / 200) * (h - 20) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Draw MQ135 Line (Amber)
+      ctx.beginPath();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < chartHistory.length; i++) {
+        const x = i * step;
+        // scale MQ135 raw 0 - 4000
+        const normMq = Math.max(0, Math.min(4000, chartHistory[i].mq135));
+        const y = h - (normMq / 4000) * (h - 20) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Listen for state update event
+    window.addEventListener('stadium:stateUpdated', (e) => {
+      const state = e.detail;
+      if (!state || !state.sensorData) return;
+
+      const { distance_cm, flame, mq135_raw, ir_detected } = state.sensorData;
+      const { crowdLevel, crowdScore, airQuality } = state.fusion;
+
+      // 1. Ultrasonic Card
+      const distEl = document.getElementById('card-dist-val');
+      const distStatusEl = document.getElementById('card-dist-status');
+      const distBarEl = document.getElementById('card-dist-bar');
+
+      if (distEl && typeof distance_cm === 'number') {
+        distEl.textContent = distance_cm.toFixed(1);
+        distStatusEl.textContent = crowdLevel;
+        if (crowdLevel === 'CRITICAL') {
+          distStatusEl.className = 'sensor-status-badge badge-danger blink-fast';
+          distBarEl.style.backgroundColor = '#ef4444';
+        } else if (crowdLevel === 'HIGH') {
+          distStatusEl.className = 'sensor-status-badge badge-warning';
+          distBarEl.style.backgroundColor = '#f59e0b';
+        } else {
+          distStatusEl.className = 'sensor-status-badge badge-success';
+          distBarEl.style.backgroundColor = '#10b981';
+        }
+        distBarEl.style.width = Math.min(100, Math.max(5, (distance_cm / 200) * 100)) + '%';
+      }
+
+      // 2. Flame Card
+      const flamePanel = document.getElementById('card-flame-panel');
+      const flameVal = document.getElementById('card-flame-value');
+      const flameBadge = document.getElementById('card-flame-badge');
+      const flameDesc = document.getElementById('card-flame-desc');
+
+      if (flame) {
+        flamePanel.classList.add('active-hazard');
+        flameVal.textContent = 'FIRE DETECTED';
+        flameVal.style.color = '#ef4444';
+        flameBadge.textContent = '🔴 EMERGENCY HAZARD';
+        flameBadge.className = 'sensor-status-badge badge-danger blink-fast';
+        flameDesc.textContent = 'Optical flame sensor triggered! Immediate evacuation advised.';
+      } else {
+        flamePanel.classList.remove('active-hazard');
+        flameVal.textContent = 'SAFE';
+        flameVal.style.color = '#34d399';
+        flameBadge.textContent = '🟢 No flame detected';
+        flameBadge.className = 'sensor-status-badge badge-success';
+        flameDesc.textContent = 'Optical infrared flame detection is active.';
+      }
+
+      // 3. MQ135 Card
+      const mqVal = document.getElementById('card-mq135-val');
+      const mqBadge = document.getElementById('card-mq135-badge');
+      const mqBar = document.getElementById('card-mq135-bar');
+
+      if (mqVal && typeof mq135_raw === 'number') {
+        mqVal.textContent = mq135_raw;
+        mqBadge.textContent = airQuality;
+        if (airQuality === 'POOR') {
+          mqBadge.className = 'sensor-status-badge badge-danger';
+          mqBar.style.backgroundColor = '#ef4444';
+        } else if (airQuality === 'MODERATE') {
+          mqBadge.className = 'sensor-status-badge badge-warning';
+          mqBar.style.backgroundColor = '#f59e0b';
+        } else {
+          mqBadge.className = 'sensor-status-badge badge-success';
+          mqBar.style.backgroundColor = '#10b981';
+        }
+        mqBar.style.width = Math.min(100, (mq135_raw / 3500) * 100) + '%';
+      }
+
+      // 4. IR Card
+      const irVal = document.getElementById('card-ir-val');
+      const irBadge = document.getElementById('card-ir-badge');
+
+      if (irVal) {
+        if (ir_detected) {
+          irVal.textContent = 'OBJECT DETECTED';
+          irVal.style.color = '#38bdf8';
+          irBadge.textContent = '🔵 PERSON / VEHICLE';
+          irBadge.className = 'sensor-status-badge badge-safe';
+        } else {
+          irVal.textContent = 'CLEAR';
+          irVal.style.color = '#94a3b8';
+          irBadge.textContent = '⚪ NO OBJECT';
+          irBadge.className = 'sensor-status-badge badge-muted';
+        }
+      }
+
+      // Update Top live time label
+      const timeAgoEl = document.getElementById('live-time-ago');
+      if (timeAgoEl) {
+        timeAgoEl.textContent = `Telemetry Live (Device: ${state.activeDeviceId})`;
+      }
+
+      // Append to table
+      const timeStr = new Date().toLocaleTimeString();
+      historyList.unshift({
+        time: timeStr,
+        distance: distance_cm ? distance_cm.toFixed(1) : '--',
+        flame: flame ? '🔥 FIRE' : 'SAFE',
+        flameClass: flame ? 'color: #ef4444; font-weight: bold;' : 'color: #34d399;',
+        mq135: mq135_raw || '--',
+        airQuality: airQuality,
+        ir: ir_detected ? 'YES' : 'NO',
+        crowdScore: crowdScore
+      });
+
+      if (historyList.length > maxHistory) historyList.pop();
+
+      const tbody = document.getElementById('telemetry-history-tbody');
+      if (tbody) {
+        tbody.innerHTML = historyList.map(item => `
+          <tr>
+            <td>${item.time}</td>
+            <td><strong>${item.distance}</strong></td>
+            <td style="${item.flameClass}">${item.flame}</td>
+            <td>${item.mq135}</td>
+            <td><span class="badge ${item.airQuality === 'POOR' ? 'badge-danger' : item.airQuality === 'MODERATE' ? 'badge-warning' : 'badge-success'}">${item.airQuality}</span></td>
+            <td><strong>${item.ir}</strong></td>
+            <td>${item.crowdScore} / 100</td>
+          </tr>
+        `).join('');
+      }
+
+      // Update Chart points
+      chartHistory.push({
+        distance: distance_cm || 100,
+        mq135: mq135_raw || 800
+      });
+      if (chartHistory.length > maxChartPoints) chartHistory.shift();
+      renderCanvasChart();
+    });
+  </script>
+</body>
+</html>
+

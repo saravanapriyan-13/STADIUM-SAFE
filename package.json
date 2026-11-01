@@ -1,0 +1,25 @@
+{
+  "name": "stadium-safe-ai",
+  "version": "1.0.0",
+  "description": "StadiumSafe AI - Smart Crowd, Parking & Emergency Navigation System with Real ESP32 Sensor Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "esp32",
+    "web-serial",
+    "iot",
+    "stadium-safety",
+    "smart-city",
+    "emergency-navigation"
+  ],
+  "author": "Engineering Student Project",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}
+

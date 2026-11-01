@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crowd Management & Flow — StadiumSafe AI</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="brand-logo">🛡️ STADIUMSAFE AI</a>
+        <span class="brand-subtitle">Crowd Flow Intelligence</span>
+      </div>
+
+      <div class="header-status-ribbon">
+        <span id="global-esp-status" class="status-pill status-pill-disconnected">
+          <span class="indicator-dot dot-red"></span> ESP32 DISCONNECTED
+        </span>
+        <span id="global-esp-mode" class="badge badge-muted">STANDBY</span>
+        <span id="global-data-badge" class="badge badge-muted">OFFLINE</span>
+        <span id="global-emergency-badge" class="badge badge-safe">🟢 ALL SAFE</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="sensors.html" class="nav-link">⚡ Live ESP32</a>
+        <a href="crowd.html" class="nav-link active">Crowd</a>
+        <a href="parking.html" class="nav-link">Parking</a>
+        <a href="navigation.html" class="nav-link">Navigation</a>
+        <a href="emergency.html" class="nav-link">Emergency</a>
+        <a href="control-room.html" class="nav-link">Control Room</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="global-emergency-banner" class="emergency-banner hidden"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">CROWD DENSITY & BOTTLENECK CONTROL</h1>
+        <p class="page-subtitle">Real-time ultrasonic queue sensing and turnstile throughput management.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-secondary" onclick="window.SimulationService.simulateCrowdSurge()">⚡ Simulate Crowd Surge</button>
+        <button class="btn btn-secondary" onclick="window.SimulationService.resetSimulation()">🔄 Reset Simulation</button>
+      </div>
+    </div>
+
+    <!-- Featured ESP32 Monitored Gate A Card -->
+    <div class="glass-panel" style="border-color: rgba(0, 240, 255, 0.4); margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <span class="badge badge-success" style="margin-bottom: 0.25rem;">REAL HARDWARE MONITORED ZONE</span>
+          <h2 style="font-size: 1.4rem; font-weight: 800;">Entry Gate A — Local Crowd Density Sensor</h2>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">
+            Monitored by <strong>STADIUMSAFE-ESP32-01</strong> using HC-SR04 Ultrasonic Distance + TCRT5000 IR sensor fusion.
+          </p>
+        </div>
+        <div style="text-align: right;">
+          <div id="gate-a-score-huge" style="font-size: 2.5rem; font-weight: 900; color: #34d399; line-height: 1;">36%</div>
+          <span id="gate-a-badge" class="badge badge-success">LOW CONGESTION</span>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top: 1rem;">
+        <div style="background: rgba(7, 11, 20, 0.8); padding: 1rem; border-radius: var(--radius-sm);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Queue Distance</div>
+          <div id="gate-a-dist" style="font-size: 1.4rem; font-weight: 800; color: var(--accent-cyan);">-- cm</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Distance to person in front of gate</div>
+        </div>
+
+        <div style="background: rgba(7, 11, 20, 0.8); padding: 1rem; border-radius: var(--radius-sm);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">IR Movement Verification</div>
+          <div id="gate-a-ir" style="font-size: 1.4rem; font-weight: 800; color: #60a5fa;">CLEAR</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Object optical beam detection</div>
+        </div>
+
+        <div style="background: rgba(7, 11, 20, 0.8); padding: 1rem; border-radius: var(--radius-sm);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Recommended Visitor Action</div>
+          <div id="gate-a-recommendation" style="font-size: 1rem; font-weight: 700; color: #34d399;">NORMAL INGRESS</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Queue times under 2 minutes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Stadium Sectors -->
+    <div class="glass-panel">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">All Stadium Ingress & Seating Sectors</h3>
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Zone / Sector</th>
+              <th>Sector Type</th>
+              <th>Rated Capacity</th>
+              <th>Estimated Headcount</th>
+              <th>Congestion Score</th>
+              <th>Status</th>
+              <th>Telemetry Source</th>
+            </tr>
+          </thead>
+          <tbody id="crowd-table-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>StadiumSafe AI — College Engineering Project Prototype</div>
+    <div class="disclaimer-box">
+      ⚠️ <strong>Academic Note:</strong> A single ultrasonic sensor functions as a localized gate queue occupancy prototype, demonstrating hardware telemetry propagation into wide-area venue modeling.
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/sensorService.js"></script>
+  <script src="js/simulationService.js"></script>
+  <script>
+    async function loadCrowdData() {
+      try {
+        const url = window.getApiUrl ? window.getApiUrl('/api/crowd') : '/api/crowd';
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.zones) {
+          renderTable(data.zones);
+        }
+      } catch (e) {}
+    }
+
+    function renderTable(zones) {
+      const tbody = document.getElementById('crowd-table-body');
+      if (!tbody) return;
+
+      tbody.innerHTML = zones.map(z => {
+        const isEsp = z.id === 'ZONE-GATE-A';
+        const color = z.densityScore > 80 ? '#ef4444' : z.densityScore > 60 ? '#f59e0b' : '#34d399';
+        const badge = z.densityScore > 80 ? 'badge-danger' : z.densityScore > 60 ? 'badge-warning' : 'badge-success';
+
+        return `
+          <tr>
+            <td><strong>${z.name}</strong></td>
+            <td><span style="text-transform: capitalize; color: var(--text-secondary);">${z.type.replace('_', ' ')}</span></td>
+            <td>${z.capacity.toLocaleString()}</td>
+            <td>${z.currentCount.toLocaleString()}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-weight: 800; color: ${color}; width: 35px;">${z.densityScore}%</span>
+                <div class="sensor-bar-bg" style="width: 100px; margin: 0;">
+                  <div class="sensor-bar-fill" style="width: ${z.densityScore}%; background-color: ${color};"></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge ${badge}">${z.status}</span></td>
+            <td>${isEsp ? '<span class="badge badge-safe">REAL ESP32 SENSOR</span>' : '<span style="color: var(--text-muted);">Venue Estimation</span>'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Sync live Gate A card with hardware
+    window.addEventListener('stadium:stateUpdated', (e) => {
+      const state = e.detail;
+      if (!state || !state.sensorData) return;
+
+      const { distance_cm, ir_detected } = state.sensorData;
+      const { crowdScore, crowdLevel } = state.fusion;
+
+      const scoreEl = document.getElementById('gate-a-score-huge');
+      const badgeEl = document.getElementById('gate-a-badge');
+      const distEl = document.getElementById('gate-a-dist');
+      const irEl = document.getElementById('gate-a-ir');
+      const recEl = document.getElementById('gate-a-recommendation');
+
+      if (scoreEl) {
+        scoreEl.textContent = `${crowdScore}%`;
+        scoreEl.style.color = crowdScore >= 80 ? '#ef4444' : crowdScore >= 60 ? '#f59e0b' : '#34d399';
+      }
+
+      if (badgeEl) {
+        badgeEl.textContent = crowdLevel;
+        badgeEl.className = `badge ${crowdLevel === 'CRITICAL' ? 'badge-danger blink-fast' : crowdLevel === 'HIGH' ? 'badge-warning' : 'badge-success'}`;
+      }
+
+      if (distEl && typeof distance_cm === 'number') distEl.textContent = `${distance_cm.toFixed(1)} cm`;
+      if (irEl) irEl.textContent = ir_detected ? 'OBJECT DETECTED' : 'CLEAR';
+
+      if (recEl) {
+        if (crowdLevel === 'CRITICAL') {
+          recEl.textContent = 'Divert to Gate B & C';
+          recEl.style.color = '#ef4444';
+        } else if (crowdLevel === 'HIGH') {
+          recEl.textContent = 'Open Overflow Turnstiles';
+          recEl.style.color = '#f59e0b';
+        } else {
+          recEl.textContent = 'NORMAL INGRESS';
+          recEl.style.color = '#34d399';
+        }
+      }
+
+      loadCrowdData();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadCrowdData);
+  </script>
+</body>
+</html>
+
