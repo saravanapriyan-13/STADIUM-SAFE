@@ -463,7 +463,7 @@
     </div>
 
     <!-- ============================================================== -->
-    <!-- SCREEN 6: NAVIGATION VIEW                                       -->
+    <!-- SCREEN 6: REALISTIC INTERACTIVE STADIUM NAVIGATION (IMAGE 2)     -->
     <!-- ============================================================== -->
     <div id="view-navigation" class="screen-view">
       <div class="app-header-blue mobile-only-header">
@@ -472,61 +472,363 @@
       </div>
 
       <div class="view-body">
-        <div class="section-label">Stadium Wayfinding Map</div>
-        
-        <div id="nav-detour-notice" style="display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: var(--radius-md); padding: 1rem; font-size: 0.9rem; color: #991b1b;">
-          🔥 <strong>Dijkstra Evacuation Detour Engaged:</strong> Entry Gate A is BLOCKED due to real hardware flame detection! Detouring spectators safely to Emergency Exit NW.
+        <!-- Emergency Hazard Detour Banner -->
+        <div id="nav-detour-notice" style="display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: var(--radius-md); padding: 1rem; font-size: 0.92rem; color: #991b1b; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);">
+          🚨 <strong>Dijkstra Evacuation Detour Active:</strong> Gate 1 (Entry Gate A) is BLOCKED by real sensor hazard! Rerouting pedestrians through safe concourse to <strong>Emergency Exit NW</strong>.
         </div>
 
-        <div class="desktop-grid-2col">
-          <!-- Map Topology -->
-          <div style="background: #ffffff; border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #eef2f6; text-align: center;">
-            <svg id="app-nav-svg" viewBox="0 0 400 300" style="width: 100%; height: 260px;">
-              <line x1="60" y1="150" x2="140" y2="150" stroke="#cbd5e1" stroke-width="4" id="svg-edge-1" />
-              <line x1="60" y1="150" x2="80" y2="60" stroke="#cbd5e1" stroke-width="3" id="svg-edge-2" />
-              <line x1="140" y1="150" x2="260" y2="150" stroke="#cbd5e1" stroke-width="4" id="svg-edge-3" />
-              <line x1="260" y1="150" x2="340" y2="150" stroke="#cbd5e1" stroke-width="4" id="svg-edge-4" />
-              <line x1="140" y1="150" x2="200" y2="80" stroke="#cbd5e1" stroke-width="3" id="svg-edge-5" />
-              <line x1="200" y1="80" x2="80" y2="60" stroke="#cbd5e1" stroke-width="3" id="svg-edge-6" />
-
-              <circle cx="60" cy="150" r="15" fill="#0284c7" id="svg-node-gateA" />
-              <text x="60" y="180" font-size="11" font-weight="800" text-anchor="middle" fill="#334155">Gate A</text>
-
-              <circle cx="140" cy="150" r="15" fill="#0284c7" id="svg-node-standA" />
-              <text x="140" y="180" font-size="11" font-weight="800" text-anchor="middle" fill="#334155">Stand A</text>
-
-              <circle cx="260" cy="150" r="15" fill="#0284c7" />
-              <text x="260" y="180" font-size="11" font-weight="800" text-anchor="middle" fill="#334155">Food Court</text>
-
-              <circle cx="340" cy="150" r="15" fill="#0284c7" />
-              <text x="340" y="180" font-size="11" font-weight="800" text-anchor="middle" fill="#334155">Gate B</text>
-
-              <circle cx="80" cy="60" r="13" fill="#22c55e" id="svg-node-exitNW" />
-              <text x="80" y="45" font-size="11" font-weight="800" text-anchor="middle" fill="#15803d">Exit NW</text>
-
-              <circle cx="200" cy="80" r="13" fill="#0284c7" />
-              <text x="200" y="65" font-size="11" font-weight="800" text-anchor="middle" fill="#334155">Concourse</text>
-            </svg>
+        <!-- Realistic Interactive Map Card (Exact match to User Image 2) -->
+        <div class="stadium-map-card">
+          <div class="map-card-header">
+            <div class="map-card-title">
+              <span>🗺️</span> Stadium Map (Interactive)
+            </div>
+            <div class="map-card-hint">
+              Drag • Pinch • Zoom
+            </div>
           </div>
 
-          <!-- Destination Picker -->
-          <div style="background: #ffffff; border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #eef2f6; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 800; margin-bottom: 0.5rem;">Select Destination</div>
-              <select id="nav-target-dropdown" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.9rem;" onchange="updateNavPath()">
-                <option value="standA">West Stand (Sec 101-115)</option>
-                <option value="foodCourt">Food & Beverage Court</option>
-                <option value="exitNW">Emergency Exit NW</option>
-                <option value="gateB">Entry Gate B</option>
+          <!-- Viewport Box with Pan & Zoom -->
+          <div id="stadium-viewport" class="stadium-viewport-box">
+            <svg id="realistic-stadium-svg" viewBox="0 0 700 700">
+              <defs>
+                <!-- Subtle Blueprint Grid Pattern -->
+                <pattern id="stadium-grid" width="35" height="35" patternUnits="userSpaceOnUse">
+                  <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#e2e8f0" stroke-width="1.2" />
+                </pattern>
+                
+                <!-- Glowing Navigation Pulse Filter -->
+                <filter id="glow-nav" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Map Pan/Zoom Transformation Group -->
+              <g id="map-transform-group">
+                <!-- Background Grid -->
+                <rect x="0" y="0" width="700" height="700" fill="#fafbfc" />
+                <rect x="0" y="0" width="700" height="700" fill="url(#stadium-grid)" />
+
+                <!-- Outer Stadium Perimeter Concourse Loop -->
+                <rect x="60" y="50" width="580" height="600" rx="28" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2.5" />
+
+                <!-- Intersecting Walking Concourse Corridors (Corridors Cross) -->
+                <!-- Horizontal Walkway -->
+                <rect x="60" y="335" width="580" height="30" rx="3" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" />
+                <!-- Vertical Walkway -->
+                <rect x="335" y="50" width="30" height="600" rx="3" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" />
+
+                <!-- Central Pitch Lawn (Field) -->
+                <rect x="210" y="150" width="280" height="400" rx="14" fill="#22c55e" stroke="#16a34a" stroke-width="3" />
+                
+                <!-- Field Grid Pattern Cuts -->
+                <g opacity="0.18">
+                  <line x1="210" y1="200" x2="490" y2="200" stroke="#ffffff" stroke-width="2" />
+                  <line x1="210" y1="250" x2="490" y2="250" stroke="#ffffff" stroke-width="2" />
+                  <line x1="210" y1="300" x2="490" y2="300" stroke="#ffffff" stroke-width="2" />
+                  <line x1="210" y1="400" x2="490" y2="400" stroke="#ffffff" stroke-width="2" />
+                  <line x1="210" y1="450" x2="490" y2="450" stroke="#ffffff" stroke-width="2" />
+                  <line x1="210" y1="500" x2="490" y2="500" stroke="#ffffff" stroke-width="2" />
+                  <line x1="280" y1="150" x2="280" y2="550" stroke="#ffffff" stroke-width="2" />
+                  <line x1="420" y1="150" x2="420" y2="550" stroke="#ffffff" stroke-width="2" />
+                </g>
+
+                <!-- Central Bowling Crease & Cricket Pitch -->
+                <rect x="338" y="270" width="24" height="160" fill="#d7ccc8" stroke="#ffffff" stroke-width="1.5" />
+                <circle cx="350" cy="350" r="50" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-dasharray="6,4" />
+                <text x="350" y="346" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" letter-spacing="1">CRICKET PITCH</text>
+
+                <!-- SPECTATOR STANDS (MATCHING IMAGE 2 BLUE & CYAN BLOCKS) -->
+                <!-- 1. North Stand (Top Navy Blue Blocks) -->
+                <g id="svg-stand-north">
+                  <rect x="210" y="70" width="120" height="65" rx="5" fill="#1d4ed8" stroke="#1e40af" stroke-width="2" />
+                  <rect x="370" y="70" width="120" height="65" rx="5" fill="#1d4ed8" stroke="#1e40af" stroke-width="2" />
+                  <!-- Seat tier divisions -->
+                  <line x1="210" y1="92" x2="330" y2="92" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="210" y1="114" x2="330" y2="114" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="370" y1="92" x2="490" y2="92" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="370" y1="114" x2="490" y2="114" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <text x="350" y="65" fill="#1e3a8a" font-size="10" font-weight="900" text-anchor="middle">NORTH STAND</text>
+                </g>
+
+                <!-- 2. South Stand (Bottom Navy Blue Blocks) -->
+                <g id="svg-stand-south">
+                  <rect x="210" y="565" width="120" height="65" rx="5" fill="#1d4ed8" stroke="#1e40af" stroke-width="2" />
+                  <rect x="370" y="565" width="120" height="65" rx="5" fill="#1d4ed8" stroke="#1e40af" stroke-width="2" />
+                  <line x1="210" y1="587" x2="330" y2="587" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="210" y1="609" x2="330" y2="609" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="370" y1="587" x2="490" y2="587" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="370" y1="609" x2="490" y2="609" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <text x="350" y="645" fill="#1e3a8a" font-size="10" font-weight="900" text-anchor="middle">SOUTH STAND</text>
+                </g>
+
+                <!-- 3. West Stand (Left Cyan / Teal Blocks) -->
+                <g id="svg-stand-west">
+                  <rect x="120" y="150" width="75" height="175" rx="5" fill="#0284c7" stroke="#0369a1" stroke-width="2" />
+                  <rect x="120" y="375" width="75" height="175" rx="5" fill="#0284c7" stroke="#0369a1" stroke-width="2" />
+                  <line x1="145" y1="150" x2="145" y2="325" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="170" y1="150" x2="170" y2="325" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="145" y1="375" x2="145" y2="550" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="170" y1="375" x2="170" y2="550" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <text x="157" y="354" fill="#0369a1" font-size="10" font-weight="900" text-anchor="middle">West Stand</text>
+                </g>
+
+                <!-- 4. East Stand (Right Cyan / Teal Blocks) -->
+                <g id="svg-stand-east">
+                  <rect x="505" y="150" width="75" height="175" rx="5" fill="#0284c7" stroke="#0369a1" stroke-width="2" />
+                  <rect x="505" y="375" width="75" height="175" rx="5" fill="#0284c7" stroke="#0369a1" stroke-width="2" />
+                  <line x1="530" y1="150" x2="530" y2="325" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="555" y1="150" x2="555" y2="325" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="530" y1="375" x2="530" y2="550" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <line x1="555" y1="375" x2="555" y2="550" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+                  <text x="542" y="354" fill="#0369a1" font-size="10" font-weight="900" text-anchor="middle">East Stand</text>
+                </g>
+
+                <!-- DYNAMIC DIJKSTRA NAVIGATION TRAIL (ANIMATED GLOWING PATH) -->
+                <path id="dynamic-nav-path" class="map-nav-path" d="" filter="url(#glow-nav)" />
+
+                <!-- INTERACTIVE POI PINS & NODES (MATCHING PICTURE 2 ARCHITECTURAL WALKWAYS) -->
+                <!-- Gate 1 (ESP32 Monitored Gate A) -->
+                <g id="pin-GATE_1" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('GATE_1')">
+                  <circle cx="140" cy="75" r="22" fill="transparent" />
+                  <circle cx="140" cy="75" r="14" fill="#22c55e" stroke="#ffffff" stroke-width="3" id="circle-node-gate1" />
+                  <circle cx="140" cy="75" r="5" fill="#ffffff" />
+                  <text x="140" y="55" font-size="9" font-weight="800" text-anchor="middle" fill="#15803d">Gate 1</text>
+                </g>
+
+                <!-- Emergency Exit 1 -->
+                <g id="pin-EMERGENCY_EXIT_1" class="map-poi-pin poi-pulse-emergency" style="cursor: pointer;" onclick="quickSelectNode('EMERGENCY_EXIT_1')">
+                  <circle cx="85" cy="110" r="22" fill="transparent" />
+                  <circle cx="85" cy="110" r="13" fill="#ef4444" stroke="#ffffff" stroke-width="3" />
+                  <circle cx="85" cy="110" r="4.5" fill="#ffffff" />
+                  <text x="85" y="132" font-size="8.5" font-weight="800" text-anchor="middle" fill="#b91c1c">Exit 1</text>
+                </g>
+
+                <!-- Parking Zone A -->
+                <g id="pin-PARKING_A" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('PARKING_A')">
+                  <circle cx="85" cy="165" r="20" fill="transparent" />
+                  <circle cx="85" cy="165" r="11" fill="#f59e0b" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="85" y="185" font-size="8" font-weight="800" text-anchor="middle" fill="#b45309">Parking A</text>
+                </g>
+
+                <!-- Concourse A (West Walkway) -->
+                <g id="pin-CONCOURSE_A" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('CONCOURSE_A')">
+                  <circle cx="202" cy="245" r="20" fill="transparent" />
+                  <circle cx="202" cy="245" r="12" fill="#38bdf8" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="202" y="265" font-size="8" font-weight="800" text-anchor="middle" fill="#0284c7">Concourse A</text>
+                </g>
+
+                <!-- North Stand Pin -->
+                <g id="pin-NORTH_STAND" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('NORTH_STAND')">
+                  <circle cx="350" cy="70" r="20" fill="transparent" />
+                  <circle cx="350" cy="70" r="12" fill="#38bdf8" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="350" y="52" font-size="8.5" font-weight="800" text-anchor="middle" fill="#1e3a8a">North Stand</text>
+                </g>
+
+                <!-- West Stand Pin -->
+                <g id="pin-WEST_STAND" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('WEST_STAND')">
+                  <circle cx="95" cy="350" r="20" fill="transparent" />
+                  <circle cx="95" cy="350" r="12" fill="#38bdf8" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="95" y="372" font-size="8" font-weight="800" text-anchor="middle" fill="#0284c7">West Stand</text>
+                </g>
+
+                <!-- Central Crossroads (Concourse C) -->
+                <g id="pin-CENTER_CROSS" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('CENTER_CROSS')">
+                  <circle cx="350" cy="350" r="22" fill="transparent" />
+                  <circle cx="350" cy="350" r="13" fill="#38bdf8" stroke="#ffffff" stroke-width="3" />
+                  <text x="350" y="372" font-size="8" font-weight="800" text-anchor="middle" fill="#0369a1">Concourse C</text>
+                </g>
+
+                <!-- Restroom A (West Walkway) -->
+                <g id="pin-RESTROOM_A" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('RESTROOM_A')">
+                  <circle cx="202" cy="460" r="20" fill="transparent" />
+                  <circle cx="202" cy="460" r="12" fill="#a855f7" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="202" y="480" font-size="8" font-weight="800" text-anchor="middle" fill="#7e22ce">Restroom A</text>
+                </g>
+
+                <!-- South Stand Pin -->
+                <g id="pin-SOUTH_STAND" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('SOUTH_STAND')">
+                  <circle cx="350" cy="630" r="20" fill="transparent" />
+                  <circle cx="350" cy="630" r="12" fill="#38bdf8" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="350" y="650" font-size="8.5" font-weight="800" text-anchor="middle" fill="#1e3a8a">South Stand</text>
+                </g>
+
+                <!-- Restroom B (East Walkway) -->
+                <g id="pin-RESTROOM_B" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('RESTROOM_B')">
+                  <circle cx="498" cy="460" r="20" fill="transparent" />
+                  <circle cx="498" cy="460" r="12" fill="#a855f7" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="498" y="480" font-size="8" font-weight="800" text-anchor="middle" fill="#7e22ce">Restroom B</text>
+                </g>
+
+                <!-- Concourse B (East Walkway) -->
+                <g id="pin-CONCOURSE_B" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('CONCOURSE_B')">
+                  <circle cx="498" cy="245" r="20" fill="transparent" />
+                  <circle cx="498" cy="245" r="12" fill="#38bdf8" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="498" y="265" font-size="8" font-weight="800" text-anchor="middle" fill="#0284c7">Concourse B</text>
+                </g>
+
+                <!-- Food Court (East Walkway) -->
+                <g id="pin-FOOD_COURT" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('FOOD_COURT')">
+                  <circle cx="498" cy="300" r="20" fill="transparent" />
+                  <circle cx="498" cy="300" r="13" fill="#f59e0b" stroke="#ffffff" stroke-width="3" />
+                  <text x="498" y="282" font-size="8.5" font-weight="800" text-anchor="middle" fill="#b45309">Food Court</text>
+                </g>
+
+                <!-- East Stand Pin -->
+                <g id="pin-EAST_STAND" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('EAST_STAND')">
+                  <circle cx="605" cy="350" r="20" fill="transparent" />
+                  <circle cx="605" cy="350" r="12" fill="#38bdf8" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="605" y="372" font-size="8" font-weight="800" text-anchor="middle" fill="#0284c7">East Stand</text>
+                </g>
+
+                <!-- Parking Zone C -->
+                <g id="pin-PARKING_C" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('PARKING_C')">
+                  <circle cx="498" cy="515" r="20" fill="transparent" />
+                  <circle cx="498" cy="515" r="11" fill="#f59e0b" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="498" y="535" font-size="8" font-weight="800" text-anchor="middle" fill="#b45309">Parking C</text>
+                </g>
+
+                <!-- Gate 2 -->
+                <g id="pin-GATE_2" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('GATE_2')">
+                  <circle cx="555" cy="75" r="22" fill="transparent" />
+                  <circle cx="555" cy="75" r="14" fill="#22c55e" stroke="#ffffff" stroke-width="3" />
+                  <circle cx="555" cy="75" r="5" fill="#ffffff" />
+                  <text x="555" y="55" font-size="9" font-weight="800" text-anchor="middle" fill="#15803d">Gate 2</text>
+                </g>
+
+                <!-- Emergency Exit 2 -->
+                <g id="pin-EMERGENCY_EXIT_2" class="map-poi-pin poi-pulse-emergency" style="cursor: pointer;" onclick="quickSelectNode('EMERGENCY_EXIT_2')">
+                  <circle cx="615" cy="110" r="22" fill="transparent" />
+                  <circle cx="615" cy="110" r="13" fill="#ef4444" stroke="#ffffff" stroke-width="3" />
+                  <circle cx="615" cy="110" r="4.5" fill="#ffffff" />
+                  <text x="615" y="132" font-size="8.5" font-weight="800" text-anchor="middle" fill="#b91c1c">Exit 2</text>
+                </g>
+
+                <!-- Gate 3 -->
+                <g id="pin-GATE_3" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('GATE_3')">
+                  <circle cx="555" cy="625" r="22" fill="transparent" />
+                  <circle cx="555" cy="625" r="14" fill="#22c55e" stroke="#ffffff" stroke-width="3" />
+                  <circle cx="555" cy="625" r="5" fill="#ffffff" />
+                  <text x="555" y="648" font-size="9" font-weight="800" text-anchor="middle" fill="#15803d">Gate 3</text>
+                </g>
+
+                <!-- Emergency Exit 3 -->
+                <g id="pin-EMERGENCY_EXIT_3" class="map-poi-pin poi-pulse-emergency" style="cursor: pointer;" onclick="quickSelectNode('EMERGENCY_EXIT_3')">
+                  <circle cx="615" cy="625" r="22" fill="transparent" />
+                  <circle cx="615" cy="625" r="13" fill="#ef4444" stroke="#ffffff" stroke-width="3" />
+                  <circle cx="615" cy="625" r="4.5" fill="#ffffff" />
+                  <text x="615" y="648" font-size="8.5" font-weight="800" text-anchor="middle" fill="#b91c1c">Exit 3</text>
+                </g>
+
+                <!-- Parking Zone B -->
+                <g id="pin-PARKING_B" class="map-poi-pin" style="cursor: pointer;" onclick="quickSelectNode('PARKING_B')">
+                  <circle cx="615" cy="375" r="20" fill="transparent" />
+                  <circle cx="615" cy="375" r="11" fill="#f59e0b" stroke="#ffffff" stroke-width="2.5" />
+                  <text x="615" y="395" font-size="8" font-weight="800" text-anchor="middle" fill="#b45309">Parking B</text>
+                </g>
+
+                <!-- Active Location Pulse Markers -->
+                <g id="svg-start-marker" display="none">
+                  <circle cx="0" cy="0" r="18" fill="rgba(34, 197, 94, 0.25)" />
+                  <circle cx="0" cy="0" r="9" fill="#22c55e" stroke="#ffffff" stroke-width="2.5" />
+                </g>
+                <g id="svg-dest-marker" display="none">
+                  <circle cx="0" cy="0" r="18" fill="rgba(2, 132, 199, 0.25)" />
+                  <circle cx="0" cy="0" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="2.5" />
+                </g>
+              </g>
+            </svg>
+
+            <!-- Bottom-Left Interactive D-Pad Controller (Matching Image 2) -->
+            <div class="map-dpad-controller" style="pointer-events: auto;">
+              <div></div>
+              <button type="button" class="dpad-btn" onclick="panMap(0, 50)" title="Pan Up">▲</button>
+              <div></div>
+              <button type="button" class="dpad-btn" onclick="panMap(50, 0)" title="Pan Left">◀</button>
+              <div class="dpad-center" onclick="resetMapTransform()" title="Click to Reset View" style="cursor: pointer;">✋</div>
+              <button type="button" class="dpad-btn" onclick="panMap(-50, 0)" title="Pan Right">▶</button>
+              <div></div>
+              <button type="button" class="dpad-btn" onclick="panMap(0, -50)" title="Pan Down">▼</button>
+              <div></div>
+            </div>
+
+            <!-- Bottom-Right Interactive Zoom Controller (Matching Image 2) -->
+            <div class="map-zoom-controller" style="pointer-events: auto;">
+              <button type="button" class="zoom-btn" onclick="zoomMap(1.25)" title="Zoom In">+</button>
+              <button type="button" class="zoom-btn" onclick="zoomMap(0.8)" title="Zoom Out">−</button>
+              <button type="button" class="zoom-btn" onclick="resetMapTransform()" title="Reset View">⛶</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Route Generator & Step-by-Step Guidance Form -->
+        <div class="nav-controls-card" style="margin-top: 1.25rem;">
+          <div class="section-label" style="margin-bottom: 0;">Navigation</div>
+
+          <div class="desktop-grid-2col">
+            <!-- Select START -->
+            <div class="nav-select-group">
+              <label class="nav-select-label">Select START</label>
+              <select id="nav-start-select" class="nav-dropdown" onchange="runLiveNavigation()">
+                <option value="GATE_1" selected>Gate 1 (Entry Gate A - Main Entrance)</option>
+                <option value="GATE_2">Gate 2 (North-East Gate)</option>
+                <option value="GATE_3">Gate 3 (South Concourse Gate)</option>
+                <option value="PARKING_A">Parking Zone A</option>
+                <option value="PARKING_B">Parking Zone B</option>
+                <option value="PARKING_C">Parking Zone C</option>
+                <option value="WEST_STAND">West Stand (Sec 101-115)</option>
+                <option value="EAST_STAND">East Stand (Sec 201-215)</option>
+                <option value="NORTH_STAND">North Stand (Club House)</option>
+                <option value="SOUTH_STAND">South Stand (Pavilion)</option>
+                <option value="FOOD_COURT">Food & Beverage Court</option>
               </select>
-              <div id="nav-instructions-text" style="font-size: 0.95rem; color: #475569; margin-top: 1rem; line-height: 1.6;">
-                📍 Start: <strong>Entry Gate A</strong> ➔ Walk 45m along West Corridor ➔ Reach <strong>West Stand</strong>.
+            </div>
+
+            <!-- Select DESTINATION -->
+            <div class="nav-select-group">
+              <label class="nav-select-label">Select DESTINATION</label>
+              <select id="nav-dest-select" class="nav-dropdown" onchange="runLiveNavigation()">
+                <option value="WEST_STAND" selected>West Stand (Sec 101-115)</option>
+                <option value="EAST_STAND">East Stand (Sec 201-215)</option>
+                <option value="NORTH_STAND">North Stand (Club House)</option>
+                <option value="SOUTH_STAND">South Stand (Pavilion)</option>
+                <option value="FOOD_COURT">Food & Beverage Court</option>
+                <option value="RESTROOM_A">Restroom A (West Concourse)</option>
+                <option value="RESTROOM_B">Restroom B (East Concourse)</option>
+                <option value="EMERGENCY_EXIT_1">Emergency Exit 1 (North-West)</option>
+                <option value="EMERGENCY_EXIT_2">Emergency Exit 2 (North-East)</option>
+                <option value="EMERGENCY_EXIT_3">Emergency Exit 3 (South-East)</option>
+                <option value="GATE_2">Gate 2</option>
+                <option value="GATE_3">Gate 3</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Live Turn-by-Turn Route Guidance -->
+          <div id="nav-guidance-box" class="nav-route-summary">
+            <div class="nav-route-metrics">
+              <div class="nav-metric-item">
+                <span>📏</span> <span id="nav-metric-dist">53 meters</span>
+              </div>
+              <div class="nav-metric-item">
+                <span>⏱️</span> <span id="nav-metric-time">~48 sec walk</span>
+              </div>
+              <div class="nav-metric-item" style="margin-left: auto;">
+                <span id="nav-metric-status" class="pill-badge pill-low">🟢 Normal Route</span>
               </div>
             </div>
-            <button class="btn-primary-blue" style="margin-top: 1.5rem;" onclick="updateNavPath()">
-              🧭 Recalculate Route
-            </button>
+            <div id="nav-step-instructions" class="nav-turn-steps">
+              📍 Start at <strong>Gate 1 (Entry Gate A)</strong> ➔ Walk 28m to Concourse A ➔ Turn south into West Walkway (25m) ➔ Arrive safely at <strong>West Stand (Sec 101-115)</strong>.
+            </div>
           </div>
+
+          <button class="btn-primary-blue" onclick="runLiveNavigation()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1rem; padding: 0.9rem;">
+            🧭 Start Navigation / Recalculate Route
+          </button>
         </div>
       </div>
     </div>
@@ -612,6 +914,7 @@
   <script src="js/app.js"></script>
   <script src="js/sensorService.js"></script>
   <script src="js/esp32Serial.js"></script>
+  <script src="js/navigationService.js"></script>
   <script>
     // -------------------------------------------------------------
     // SCREEN NAVIGATION (UNIFIED FOR MOBILE & DESKTOP)
@@ -1027,42 +1330,264 @@
 
       // 6. NAVIGATION DIJKSTRA DYNAMIC HAZARD DETOUR
       const detourNotice = document.getElementById('nav-detour-notice');
-      const nodeGateA = document.getElementById('svg-node-gateA');
-      const edgeGateA = document.getElementById('svg-edge-1');
-      if (flame || isGasEmergency || (distance_cm && distance_cm > 0 && distance_cm < 25)) {
-        if (detourNotice) detourNotice.style.display = 'block';
-        if (nodeGateA) nodeGateA.setAttribute('fill', '#ef4444');
-        if (edgeGateA) edgeGateA.setAttribute('stroke', '#ef4444');
+      const gate1Circle = document.getElementById('circle-node-gate1');
+      const isGateBlocked = flame || isGasEmergency || (distance_cm && distance_cm > 0 && distance_cm < 25);
+      
+      if (gate1Circle) {
+        if (isGateBlocked) {
+          gate1Circle.setAttribute('fill', '#ef4444');
+          gate1Circle.classList.add('poi-pulse-emergency');
+        } else {
+          gate1Circle.setAttribute('fill', '#22c55e');
+          gate1Circle.classList.remove('poi-pulse-emergency');
+        }
+      }
+
+      // 6. NAVIGATION DIJKSTRA DYNAMIC HAZARD DETOUR & AUTO-EVACUATION
+      if (isGateBlocked) {
+        // Automatically route to the NEAREST SAFE EMERGENCY EXIT from person's location!
+        handleHardwareDisasterEvacuation();
       } else {
         if (detourNotice) detourNotice.style.display = 'none';
-        if (nodeGateA) nodeGateA.setAttribute('fill', '#0284c7');
-        if (edgeGateA) edgeGateA.setAttribute('stroke', '#cbd5e1');
+        if (document.getElementById('view-navigation')?.classList.contains('active')) {
+          runLiveNavigation();
+        }
       }
     });
 
-    // -------------------------------------------------------------
-    // NAVIGATION & WAYFINDING LOGIC
-    // -------------------------------------------------------------
-    function updateNavPath() {
-      const target = document.getElementById('nav-target-dropdown').value;
-      const text = document.getElementById('nav-instructions-text');
-      const state = window.StadiumState;
-      const isGateABlocked = state && (state.sensorData.flame || (state.sensorData.mq135_raw && state.sensorData.mq135_raw >= 3000) || (state.sensorData.distance_cm && state.sensorData.distance_cm > 0 && state.sensorData.distance_cm < 25));
+    // Automatic disaster evacuation router: Directly shows route to nearest safe emergency exit from person's location
+    function handleHardwareDisasterEvacuation() {
+      const startSelect = document.getElementById('nav-start-select');
+      const destSelect = document.getElementById('nav-dest-select');
+      const currentStart = startSelect ? startSelect.value : 'WEST_STAND';
 
-      if (isGateABlocked) {
-        text.innerHTML = '🚨 <strong style="color:#ef4444;">HAZARD DETOUR ACTIVE:</strong> Entry Gate A is BLOCKED! Proceed through <strong>Emergency Exit NW</strong>. Staff wardens stationed along North Corridor.';
+      if (!window.NavigationService) return;
+      const nearest = window.NavigationService.findNearestSafeExit(currentStart);
+      if (nearest) {
+        if (destSelect) {
+          destSelect.value = nearest.exitId;
+        }
+
+        // Switch automatically to navigation view if not already there
+        goToScreen('view-navigation');
+        runLiveNavigation();
+
+        const detourNotice = document.getElementById('nav-detour-notice');
+        if (detourNotice) {
+          detourNotice.style.display = 'block';
+          const exitName = nearest.exitId === 'EMERGENCY_EXIT_1' ? 'Emergency Exit 1 (North-West)' 
+                        : nearest.exitId === 'EMERGENCY_EXIT_2' ? 'Emergency Exit 2 (North-East)' 
+                        : 'Emergency Exit 3 (South-East)';
+          detourNotice.innerHTML = `🚨 <strong>AUTOMATIC EVACUATION ACTIVE:</strong> Physical hazard detected at Gate 1! Nearest safe exit from your location is <strong>${exitName}</strong> (${nearest.result.distance}m away). Follow illuminated floor markers now!`;
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // REALISTIC INTERACTIVE STADIUM MAP ENGINE (IMAGE 2)
+    // -------------------------------------------------------------
+    let mapZoom = 1;
+    let mapPanX = 0;
+    let mapPanY = 0;
+    let isDraggingMap = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    function applyMapTransform() {
+      const group = document.getElementById('map-transform-group');
+      if (group) {
+        group.setAttribute('transform', `translate(${mapPanX}, ${mapPanY}) scale(${mapZoom})`);
+      }
+    }
+
+    function panMap(dx, dy) {
+      mapPanX += dx;
+      mapPanY += dy;
+      applyMapTransform();
+    }
+
+    function zoomMap(factor) {
+      const newZoom = mapZoom * factor;
+      if (newZoom >= 0.65 && newZoom <= 3.2) {
+        mapZoom = newZoom;
+        applyMapTransform();
+      }
+    }
+
+    function resetMapTransform() {
+      mapZoom = 1;
+      mapPanX = 0;
+      mapPanY = 0;
+      applyMapTransform();
+    }
+
+    // Direct Pin Click on Map
+    function quickSelectNode(nodeId) {
+      const destSelect = document.getElementById('nav-dest-select');
+      const startSelect = document.getElementById('nav-start-select');
+      if (destSelect) {
+        if (destSelect.value === nodeId && startSelect) {
+          startSelect.value = nodeId;
+        } else {
+          destSelect.value = nodeId;
+        }
+        runLiveNavigation();
+        if (window.StadiumApp && window.StadiumApp.showToast) {
+          const node = window.NavigationService?.nodes.find(n => n.id === nodeId);
+          window.StadiumApp.showToast(`Selected: ${node ? node.name : nodeId}`, 'info', 2000);
+        }
+      }
+    }
+
+    // Dynamic Wayfinding Router (Dijkstra + Live Hazard Detour)
+    function runLiveNavigation() {
+      const startSelect = document.getElementById('nav-start-select');
+      const destSelect = document.getElementById('nav-dest-select');
+      if (!startSelect || !destSelect || !window.NavigationService) return;
+
+      const startId = startSelect.value;
+      const destId = destSelect.value;
+
+      const result = window.NavigationService.findPath(startId, destId);
+      const navPath = document.getElementById('dynamic-nav-path');
+      const startMarker = document.getElementById('svg-start-marker');
+      const destMarker = document.getElementById('svg-dest-marker');
+      const distEl = document.getElementById('nav-metric-dist');
+      const timeEl = document.getElementById('nav-metric-time');
+      const statusEl = document.getElementById('nav-metric-status');
+      const stepsEl = document.getElementById('nav-step-instructions');
+      const detourNotice = document.getElementById('nav-detour-notice');
+
+      if (!result || !result.points || result.points.length === 0) {
+        if (navPath) navPath.setAttribute('d', '');
+        if (startMarker) startMarker.setAttribute('display', 'none');
+        if (destMarker) destMarker.setAttribute('display', 'none');
+        if (stepsEl) stepsEl.innerHTML = '⚠️ <strong>No route available.</strong> Area is currently blocked by emergency protocols.';
         return;
       }
 
-      if (target === 'standA') {
-        text.innerHTML = '📍 Start: <strong>Entry Gate A</strong> ➔ Walk 45m along West Corridor ➔ Reach <strong>West Stand (Sec 101-115)</strong>.';
-      } else if (target === 'foodCourt') {
-        text.innerHTML = '📍 Start: <strong>Entry Gate A</strong> ➔ Pass West Stand ➔ Reach <strong>Food & Beverage Court</strong>.';
-      } else if (target === 'exitNW') {
-        text.innerHTML = '📍 Start: <strong>Entry Gate A</strong> ➔ Turn left ➔ Proceed through <strong>Emergency Exit NW</strong>.';
-      } else {
-        text.innerHTML = '📍 Start: <strong>Entry Gate A</strong> ➔ Follow perimeter concourse ➔ Reach <strong>Entry Gate B</strong>.';
+      // 1. Build smooth SVG Path string
+      const points = result.points;
+      let d = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        d += ` L ${points[i].x} ${points[i].y}`;
       }
+
+      if (navPath) {
+        navPath.setAttribute('d', d);
+        if (result.rerouted) {
+          navPath.classList.add('map-nav-path-hazard');
+        } else {
+          navPath.classList.remove('map-nav-path-hazard');
+        }
+      }
+
+      // 2. Position Pulse Markers
+      if (startMarker && points.length > 0) {
+        startMarker.setAttribute('transform', `translate(${points[0].x}, ${points[0].y})`);
+        startMarker.setAttribute('display', 'inline');
+      }
+      if (destMarker && points.length > 0) {
+        const last = points[points.length - 1];
+        destMarker.setAttribute('transform', `translate(${last.x}, ${last.y})`);
+        destMarker.setAttribute('display', 'inline');
+      }
+
+      // 3. Update Metrics
+      if (distEl) distEl.textContent = `${result.distance} meters`;
+      if (timeEl) timeEl.textContent = `~${result.walkTimeSec} sec walk`;
+      
+      if (statusEl) {
+        if (result.rerouted) {
+          statusEl.textContent = '🚨 Hazard Detour Active';
+          statusEl.className = 'pill-badge pill-high';
+        } else {
+          statusEl.textContent = '🟢 Clear Pathway';
+          statusEl.className = 'pill-badge pill-low';
+        }
+      }
+
+      // 4. Update Step-by-Step Guidance
+      if (stepsEl) {
+        let html = '';
+        if (result.rerouted) {
+          html += '<div style="color:#dc2626; font-weight:800; margin-bottom:0.25rem;">⚠️ DYNAMIC DETOUR ENGAGED: Entry Gate A is blocked. Following safe bypass route!</div>';
+        }
+        result.steps.forEach((step, idx) => {
+          const icon = idx === 0 ? '📍' : idx === result.steps.length - 1 ? '🏁' : '➔';
+          html += `<div>${icon} ${step}</div>`;
+        });
+        stepsEl.innerHTML = html;
+      }
+    }
+
+    // Inter-screen navigation bridge
+    function navigateToZone(zoneName) {
+      goToScreen('view-navigation');
+      const destSelect = document.getElementById('nav-dest-select');
+      if (destSelect) {
+        if (zoneName.includes('West Stand')) destSelect.value = 'WEST_STAND';
+        else if (zoneName.includes('East Stand')) destSelect.value = 'EAST_STAND';
+        else if (zoneName.includes('Exit')) destSelect.value = 'EMERGENCY_EXIT_1';
+        else if (zoneName.includes('Zone A')) destSelect.value = 'PARKING_A';
+        else if (zoneName.includes('Zone B')) destSelect.value = 'PARKING_B';
+        else if (zoneName.includes('Gate B')) destSelect.value = 'GATE_2';
+        else destSelect.value = 'WEST_STAND';
+        
+        runLiveNavigation();
+      }
+    }
+
+    // Setup Drag-to-Pan on Map Viewport
+    function initMapDragPan() {
+      const viewport = document.getElementById('stadium-viewport');
+      if (!viewport) return;
+
+      viewport.addEventListener('mousedown', (e) => {
+        isDraggingMap = true;
+        dragStartX = e.clientX - mapPanX;
+        dragStartY = e.clientY - mapPanY;
+        viewport.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingMap) return;
+        mapPanX = e.clientX - dragStartX;
+        mapPanY = e.clientY - dragStartY;
+        applyMapTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDraggingMap) {
+          isDraggingMap = false;
+          if (viewport) viewport.style.cursor = 'grab';
+        }
+      });
+
+      // Mouse Wheel Zoom
+      viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomMap(factor);
+      }, { passive: false });
+
+      // Touch Pan
+      let touchStartX = 0;
+      let touchStartY = 0;
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX - mapPanX;
+          touchStartY = e.touches[0].clientY - mapPanY;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+          mapPanX = e.touches[0].clientX - touchStartX;
+          mapPanY = e.touches[0].clientY - touchStartY;
+          applyMapTransform();
+        }
+      }, { passive: true });
     }
 
     function triggerGlobalSos() {
@@ -1075,6 +1600,9 @@
 
     // Default load: show splash screen on mobile, dashboard on desktop
     document.addEventListener('DOMContentLoaded', () => {
+      initMapDragPan();
+      runLiveNavigation();
+
       const irBtn = document.getElementById('btn-ir-invert');
       if (irBtn && window.irInvertMode) {
         irBtn.textContent = '🔄 Inverted';

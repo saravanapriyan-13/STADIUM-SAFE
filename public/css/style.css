@@ -963,3 +963,280 @@ body {
   from { opacity: 1; }
   to { opacity: 0.3; }
 }
+
+/* -------------------------------------------------------------
+   REALISTIC STADIUM MAP & WAYFINDING STYLES (MATCHING IMAGE 2)
+   ------------------------------------------------------------- */
+.stadium-map-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1.25rem;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.map-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.map-card-hint {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.3px;
+}
+
+.stadium-viewport-box {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  background-color: #fafbfc;
+  background-image: 
+    linear-gradient(#f1f5f9 1.5px, transparent 1.5px),
+    linear-gradient(90deg, #f1f5f9 1.5px, transparent 1.5px);
+  background-size: 30px 30px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+}
+
+.stadium-viewport-box:active {
+  cursor: grabbing;
+}
+
+#realistic-stadium-svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  transition: transform 0.1s ease-out;
+}
+
+/* Floating D-Pad Controller (Bottom-Left) */
+.map-dpad-controller {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 100px;
+  height: 100px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  border: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 6px;
+  z-index: 10;
+  user-select: none;
+}
+
+.dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.dpad-btn:hover {
+  background: #f1f5f9;
+  color: #0284c7;
+}
+
+.dpad-btn:active {
+  background: #e2e8f0;
+  transform: scale(0.92);
+}
+
+.dpad-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #64748b;
+  cursor: default;
+}
+
+/* Floating Zoom Controller (Bottom-Right) */
+.map-zoom-controller {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.zoom-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.zoom-btn:last-child {
+  border-bottom: none;
+  font-size: 1rem;
+}
+
+.zoom-btn:hover {
+  background: #f8fafc;
+  color: #0284c7;
+}
+
+.zoom-btn:active {
+  background: #e2e8f0;
+}
+
+/* Animated Navigation Path */
+.map-nav-path {
+  fill: none;
+  stroke: #0284c7;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 12, 6;
+  animation: navDashAnim 1.2s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.8));
+}
+
+.map-nav-path-hazard {
+  stroke: #ef4444 !important;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)) !important;
+}
+
+@keyframes navDashAnim {
+  from { stroke-dashoffset: 36; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* POI Pin Pulsing (Rock-Solid Glow, NO Shaking or Jumping!) */
+.poi-pulse-emergency {
+  animation: pulseExitGlow 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes pulseExitGlow {
+  0% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1));
+  }
+}
+
+/* Navigation Form Card */
+.nav-controls-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.nav-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.nav-select-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-dropdown {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #cbd5e1;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.nav-dropdown:focus {
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.nav-route-summary {
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-route-metrics {
+  display: flex;
+  gap: 1.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed #cbd5e1;
+}
+
+.nav-metric-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.nav-turn-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.5;
+}
