@@ -1124,15 +1124,16 @@ body {
 }
 
 /* Animated Navigation Path */
+#dynamic-nav-path,
 .map-nav-path {
-  fill: none;
-  stroke: #0284c7;
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 12, 6;
-  animation: navDashAnim 1.2s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.8));
+  fill: none !important;
+  stroke: #0284c7 !important;
+  stroke-width: 6px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  stroke-dasharray: 12, 6 !important;
+  animation: navDashAnim 1.2s linear infinite !important;
+  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.8)) !important;
 }
 
 .map-nav-path-hazard {

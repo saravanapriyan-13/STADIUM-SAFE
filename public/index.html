@@ -4,7 +4,198 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StadiumSafe AI — Smart Stadium Navigation & Safety</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=3.0">
+  <style>
+    /* CRITICAL INLINE MAP & WAYFINDING STYLES (IMMUNE TO CACHE ISSUES) */
+    .stadium-map-card {
+      background: #ffffff !important;
+      border-radius: 20px !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+      border: 1px solid #e2e8f0 !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      margin-bottom: 1.25rem !important;
+    }
+    .map-card-header {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 0.9rem 1.25rem !important;
+      background: #ffffff !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+    }
+    .map-card-title {
+      font-size: 1rem !important;
+      font-weight: 800 !important;
+      color: #1e293b !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+    }
+    .map-card-hint {
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+      color: #64748b !important;
+      letter-spacing: 0.3px !important;
+    }
+    .stadium-viewport-box {
+      position: relative !important;
+      width: 100% !important;
+      height: 520px !important;
+      max-height: 72vh !important;
+      background-color: #fafbfc !important;
+      background-image: 
+        linear-gradient(#f1f5f9 1.5px, transparent 1.5px),
+        linear-gradient(90deg, #f1f5f9 1.5px, transparent 1.5px) !important;
+      background-size: 30px 30px !important;
+      overflow: hidden !important;
+      cursor: grab !important;
+      user-select: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .stadium-viewport-box:active {
+      cursor: grabbing !important;
+    }
+    #realistic-stadium-svg {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      display: block !important;
+      pointer-events: auto !important;
+    }
+    /* Floating D-Pad Controller (Bottom-Left) */
+    .map-dpad-controller {
+      position: absolute !important;
+      bottom: 16px !important;
+      left: 16px !important;
+      width: 104px !important;
+      height: 104px !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      backdrop-filter: blur(8px) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16) !important;
+      border: 1.5px solid #cbd5e1 !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-rows: repeat(3, 1fr) !important;
+      padding: 6px !important;
+      z-index: 100 !important;
+      user-select: none !important;
+      pointer-events: auto !important;
+    }
+    .dpad-btn {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border: none !important;
+      background: transparent !important;
+      color: #334155 !important;
+      font-size: 0.9rem !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      border-radius: 6px !important;
+      transition: all 0.15s ease !important;
+      pointer-events: auto !important;
+    }
+    .dpad-btn:hover {
+      background: #f1f5f9 !important;
+      color: #0284c7 !important;
+    }
+    .dpad-btn:active {
+      background: #e2e8f0 !important;
+      transform: scale(0.92) !important;
+    }
+    .dpad-center {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 1.15rem !important;
+      color: #64748b !important;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+    }
+    /* Floating Zoom Controller (Bottom-Right) */
+    .map-zoom-controller {
+      position: absolute !important;
+      bottom: 16px !important;
+      right: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      backdrop-filter: blur(8px) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16) !important;
+      border: 1.5px solid #cbd5e1 !important;
+      overflow: hidden !important;
+      z-index: 100 !important;
+      pointer-events: auto !important;
+    }
+    .zoom-btn {
+      width: 44px !important;
+      height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border: none !important;
+      background: transparent !important;
+      color: #1e293b !important;
+      font-size: 1.3rem !important;
+      font-weight: 800 !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      pointer-events: auto !important;
+    }
+    .zoom-btn:last-child {
+      border-bottom: none !important;
+      font-size: 1.05rem !important;
+    }
+    .zoom-btn:hover {
+      background: #f8fafc !important;
+      color: #0284c7 !important;
+    }
+    .zoom-btn:active {
+      background: #e2e8f0 !important;
+    }
+    /* Animated Navigation Trail (GUARANTEED NO BLACK FILL) */
+    #dynamic-nav-path,
+    .map-nav-path {
+      fill: none !important;
+      stroke: #0284c7 !important;
+      stroke-width: 6px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+      stroke-dasharray: 12, 6 !important;
+      animation: navDashAnim 1.2s linear infinite !important;
+      filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.8)) !important;
+    }
+    .map-nav-path-hazard {
+      stroke: #ef4444 !important;
+      filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)) !important;
+    }
+    @keyframes navDashAnim {
+      from { stroke-dashoffset: 36; }
+      to { stroke-dashoffset: 0; }
+    }
+    /* Rock-Solid Glowing Exit Pins */
+    .poi-pulse-emergency {
+      animation: pulseExitGlow 1.2s infinite alternate ease-in-out !important;
+    }
+    @keyframes pulseExitGlow {
+      0% {
+        opacity: 0.85;
+        filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
+      }
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1));
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -588,8 +779,8 @@
                   <text x="542" y="354" fill="#0369a1" font-size="10" font-weight="900" text-anchor="middle">East Stand</text>
                 </g>
 
-                <!-- DYNAMIC DIJKSTRA NAVIGATION TRAIL (ANIMATED GLOWING PATH) -->
-                <path id="dynamic-nav-path" class="map-nav-path" d="" filter="url(#glow-nav)" />
+                <!-- DYNAMIC DIJKSTRA NAVIGATION TRAIL (ANIMATED GLOWING PATH - GUARANTEED NO BLACK FILL) -->
+                <path id="dynamic-nav-path" class="map-nav-path" d="" fill="none" stroke="#0284c7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="12,6" style="fill: none !important; stroke: #0284c7 !important; stroke-width: 6px !important;" />
 
                 <!-- INTERACTIVE POI PINS & NODES (MATCHING PICTURE 2 ARCHITECTURAL WALKWAYS) -->
                 <!-- Gate 1 (ESP32 Monitored Gate A) -->
@@ -910,11 +1101,11 @@
     </button>
   </nav>
 
-  <!-- SCRIPTS -->
-  <script src="js/app.js"></script>
-  <script src="js/sensorService.js"></script>
-  <script src="js/esp32Serial.js"></script>
-  <script src="js/navigationService.js"></script>
+  <!-- SCRIPTS (WITH CACHE BUSTERS TO PREVENT STALE GITHUB CDN SERVING) -->
+  <script src="js/app.js?v=3.0"></script>
+  <script src="js/sensorService.js?v=3.0"></script>
+  <script src="js/esp32Serial.js?v=3.0"></script>
+  <script src="js/navigationService.js?v=3.0"></script>
   <script>
     // -------------------------------------------------------------
     // SCREEN NAVIGATION (UNIFIED FOR MOBILE & DESKTOP)
@@ -1396,7 +1587,8 @@
     function applyMapTransform() {
       const group = document.getElementById('map-transform-group');
       if (group) {
-        group.setAttribute('transform', `translate(${mapPanX}, ${mapPanY}) scale(${mapZoom})`);
+        // Center-anchored zoom (350, 350) + smooth pan
+        group.setAttribute('transform', `translate(${mapPanX}, ${mapPanY}) translate(350, 350) scale(${mapZoom}) translate(-350, -350)`);
       }
     }
 
@@ -1408,7 +1600,7 @@
 
     function zoomMap(factor) {
       const newZoom = mapZoom * factor;
-      if (newZoom >= 0.65 && newZoom <= 3.2) {
+      if (newZoom >= 0.55 && newZoom <= 3.8) {
         mapZoom = newZoom;
         applyMapTransform();
       }
@@ -1420,6 +1612,13 @@
       mapPanY = 0;
       applyMapTransform();
     }
+
+    // Expose globally so HTML button onclick events never fail
+    window.panMap = panMap;
+    window.zoomMap = zoomMap;
+    window.resetMapTransform = resetMapTransform;
+    window.quickSelectNode = quickSelectNode;
+    window.runLiveNavigation = runLiveNavigation;
 
     // Direct Pin Click on Map
     function quickSelectNode(nodeId) {
@@ -1475,6 +1674,15 @@
 
       if (navPath) {
         navPath.setAttribute('d', d);
+        // Explicitly enforce transparent fill on SVG element (guarantees NO black fill under all circumstances!)
+        navPath.setAttribute('fill', 'none');
+        navPath.style.fill = 'none';
+        navPath.setAttribute('stroke', result.rerouted ? '#ef4444' : '#0284c7');
+        navPath.style.stroke = result.rerouted ? '#ef4444' : '#0284c7';
+        navPath.setAttribute('stroke-width', '6');
+        navPath.setAttribute('stroke-linecap', 'round');
+        navPath.setAttribute('stroke-linejoin', 'round');
+        navPath.setAttribute('stroke-dasharray', '12,6');
         if (result.rerouted) {
           navPath.classList.add('map-nav-path-hazard');
         } else {
